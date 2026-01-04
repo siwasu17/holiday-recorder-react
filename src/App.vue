@@ -125,6 +125,7 @@ const categories = [
   { key: 'housework', label: '家事(定)', color: '#FFF9C4' }, // ライトレモンイエロー
   { key: 'task', label: '家事(単)', color: '#FFD3D3' }, // パステルレッド
   { key: 'etc', label: 'その他', color: '#F0F4EF' }, // ホワイトミント
+  { key: 'nop', label: '余白', color: '#E0E0E0' }, // フォググレー
 ]
 
 /**
@@ -429,8 +430,8 @@ const resetHistoryAfterLoad = () => {
   overflow-y: auto; /* 内容が溢れたらここだけスクロールさせる */
   background-color: var(--bg-color);
   /* ヘッダーとフッターの高さに応じて調整 */
-  padding-top: 60px;
-  padding-bottom: 190px;
+  padding-top: 50px;
+  padding-bottom: 195px;
 }
 
 .timetable {
