@@ -2,15 +2,8 @@
   <div id="app-shell">
     <header class="app-header">
       <nav class="app-nav">
-        <button @click="currentView = 'Tracker'" :class="{ active: currentView === 'Tracker' }">
-          トラッカー
-        </button>
-        <button
-          @click="currentView = 'Statistics'"
-          :class="{ active: currentView === 'Statistics' }"
-        >
-          月次統計
-        </button>
+        <button @click="currentView = 'Tracker'" :class="{ active: currentView === 'Tracker' }">トラッカー</button>
+        <button @click="currentView = 'Statistics'" :class="{ active: currentView === 'Statistics' }">月次統計</button>
       </nav>
     </header>
 
@@ -44,12 +37,12 @@ const views = {
   --text-sub: #8c8b85;
   --border-color: #e8e6df;
   --accent-soft: #f0f3f5;
+  --app-header-height: 52px;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -67,6 +60,11 @@ body {
   position: sticky;
   top: 0;
   z-index: 20; /* 既存のz-indexより高く設定 */
+  height: var(--app-header-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .app-nav {
@@ -93,8 +91,4 @@ body {
   color: var(--text-main);
   font-weight: 600;
 }
-
-/* Tracker.vueのスタイルがグローバルに影響しないようにscopedに変更するか、
-   あるいはこのApp.vueで必要なスタイルを再定義・調整します。
-   Tracker.vueの<style>タグはscopedに変更するのが望ましいです。 */
 </style>
