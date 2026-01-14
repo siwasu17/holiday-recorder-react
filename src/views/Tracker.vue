@@ -291,7 +291,7 @@ const resetHistoryAfterLoad = () => {
   height: 100dvh;
   box-sizing: border-box;
   overflow-y: auto;
-  padding-bottom: 195px;
+  padding-bottom: 230px;
 }
 
 .timetable {
