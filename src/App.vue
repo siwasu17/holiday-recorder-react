@@ -3,7 +3,7 @@
     <header class="app-header">
       <nav class="app-nav">
         <button @click="currentView = 'Tracker'" :class="{ active: currentView === 'Tracker' }">トラッカー</button>
-        <button @click="currentView = 'Statistics'" :class="{ active: currentView === 'Statistics' }">月次統計</button>
+        <button @click="currentView = 'Statistics'" :class="{ active: currentView === 'Statistics' }">統計</button>
       </nav>
     </header>
 
@@ -59,7 +59,7 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
-  z-index: 20; /* 既存のz-indexより高く設定 */
+  z-index: 20;
   height: var(--app-header-height);
   box-sizing: border-box;
   display: flex;

@@ -291,6 +291,7 @@ const resetHistoryAfterLoad = () => {
   height: 100dvh;
   box-sizing: border-box;
   overflow-y: auto;
+  padding-bottom: 195px;
 }
 
 .timetable {
@@ -306,7 +307,7 @@ const resetHistoryAfterLoad = () => {
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   transition: background-color 0.2s;
-  min-height: 60px; /* Use min-height to allow content to grow */
+  min-height: 60px;
 }
 
 .time-row:hover {
@@ -332,7 +333,7 @@ const resetHistoryAfterLoad = () => {
   padding: 4px;
   display: flex;
   flex-direction: column;
-  gap: 2px; /* Add gap between activity items */
+  gap: 2px;
 }
 
 .activity-item {
@@ -402,7 +403,6 @@ const resetHistoryAfterLoad = () => {
   font-size: 0.9rem;
 }
 
-/* Styles for the modal's category selection, if needed */
 .modal-content .category-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

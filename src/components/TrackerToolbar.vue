@@ -21,7 +21,6 @@ defineEmits(['previous-day', 'next-day'])
   background: var(--surface-color);
   padding: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  /* Stick below the main app header */
   position: sticky;
   top: var(--app-header-height, 52px);
   z-index: 10;
