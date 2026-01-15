@@ -78,7 +78,7 @@ body {
   border: 1px solid transparent;
   border-radius: 20px;
   background: none;
-  font-size: 1rem;
+  font-size: 0.6rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;

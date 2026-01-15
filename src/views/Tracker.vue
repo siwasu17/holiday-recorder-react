@@ -282,14 +282,13 @@ const resetHistoryAfterLoad = () => {
 
 <style scoped>
 .tracker-container {
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--app-header-height));
 }
 
 .main-content-scrollable {
-  padding: 0;
-  margin: 0;
-  height: 100dvh;
-  box-sizing: border-box;
+  flex: 1;
   overflow-y: auto;
   padding-bottom: 230px;
 }
