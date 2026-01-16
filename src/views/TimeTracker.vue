@@ -1,6 +1,6 @@
 <template>
   <div class="tracker-container">
-    <TrackerToolbar :formatted-date="formattedDate" @previous-day="previousDay" @next-day="nextDay" />
+    <TimeTrackerToolbar :formatted-date="formattedDate" @previous-day="previousDay" @next-day="nextDay" />
 
     <main class="main-content-scrollable">
       <div class="timetable" role="table">
@@ -30,7 +30,7 @@
       </div>
     </main>
 
-    <TrackerActionFooter
+    <TimeTrackerActionFooter
       :categories="categories"
       :can-undo="canUndo"
       :can-redo="canRedo"
@@ -73,8 +73,8 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, shallowReactive, onMounted } from 'vue'
-import TrackerToolbar from '@/components/TrackerToolbar.vue'
-import TrackerActionFooter from '@/components/TrackerActionFooter.vue'
+import TimeTrackerToolbar from '@/components/TimeTrackerToolbar.vue'
+import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter.vue'
 
 const currentDate = ref(new Date())
 const currentTimeSlot = ref<string | null>(null)

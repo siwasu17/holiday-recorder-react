@@ -2,8 +2,12 @@
   <div id="app-shell">
     <header class="app-header">
       <nav class="app-nav">
-        <button @click="currentView = 'Tracker'" :class="{ active: currentView === 'Tracker' }">トラッカー</button>
-        <button @click="currentView = 'Statistics'" :class="{ active: currentView === 'Statistics' }">統計</button>
+        <button @click="currentView = 'TimeTracker'" :class="{ active: currentView === 'TimeTracker' }">
+          トラッカー
+        </button>
+        <button @click="currentView = 'ActivityStats'" :class="{ active: currentView === 'ActivityStats' }">
+          統計
+        </button>
       </nav>
     </header>
 
@@ -15,16 +19,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import Tracker from './views/Tracker.vue'
-import Statistics from './views/Statistics.vue'
+import TimeTracker from './views/TimeTracker.vue'
+import ActivityStats from './views/ActivityStats.vue'
 
-type ViewName = 'Tracker' | 'Statistics'
+type ViewName = 'TimeTracker' | 'ActivityStats'
 
-const currentView = ref<ViewName>('Tracker')
+const currentView = ref<ViewName>('TimeTracker')
 
 const views = {
-  Tracker,
-  Statistics,
+  TimeTracker,
+  ActivityStats,
 }
 </script>
 
