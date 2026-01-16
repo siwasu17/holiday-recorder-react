@@ -106,15 +106,15 @@ const categories = [
 ]
 
 const timeSlots = [
-  { start: '08:00', label: '8:00 - 10:00' },
-  { start: '10:00', label: '10:00 - 12:00' },
-  { start: '12:00', label: '12:00 - 14:00' },
-  { start: '14:00', label: '14:00 - 16:00' },
-  { start: '16:00', label: '16:00 - 18:00' },
-  { start: '18:00', label: '18:00 - 20:00' },
-  { start: '20:00', label: '20:00 - 22:00' },
-  { start: '22:00', label: '22:00 - 24:00' },
-  { start: '00:00+', label: '24:00 - 26:00' },
+  { start: '08:00', label: '8 - 10' },
+  { start: '10:00', label: '10 - 12' },
+  { start: '12:00', label: '12 - 14' },
+  { start: '14:00', label: '14 - 16' },
+  { start: '16:00', label: '16 - 18' },
+  { start: '18:00', label: '18 - 20' },
+  { start: '20:00', label: '20 - 22' },
+  { start: '22:00', label: '22 - 24' },
+  { start: '00:00+', label: '24 - 26' },
 ]
 
 onMounted(() => {
