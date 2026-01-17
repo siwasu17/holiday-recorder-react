@@ -347,6 +347,7 @@ const resetHistoryAfterLoad = () => {
 .activity-item {
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -355,6 +356,19 @@ const resetHistoryAfterLoad = () => {
   font-size: clamp(0.6rem, 1.5vh, 0.75rem);
   line-height: 1.2;
   border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memo-label {
+  background-color: white;
+  font-size: 0.8em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-top: 2px;
+  color: #333;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
