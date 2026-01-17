@@ -38,6 +38,7 @@
       :slot-index="editingSlotIndex"
       @close="closeEditModal"
       @update-activity-category="updateActivityCategory"
+      @update-activity-memo="updateActivityMemo"
       @delete-activity="deleteActivity"
     />
 
@@ -134,6 +135,14 @@ const createActivity = (categoryKey: string): Activity => {
   }
 }
 
+const copyAcitivityWithNewMemo = (srcActivity: Activity, newMemo: string): Activity => {
+  return {
+    id: srcActivity.id,
+    categoryKey: srcActivity.categoryKey,
+    memo: newMemo,
+  }
+}
+
 const getActLabel = (categoryKey: string) => {
   return categories.find((c) => c.key == categoryKey)?.label ?? '不明'
 }
@@ -218,6 +227,16 @@ const closeEditModal = () => {
   isModalOpen.value = false
   editingSlotKey.value = null
   editingSlotIndex.value = -1
+}
+
+const updateActivityMemo = (newMemo: string) => {
+  if (!editingSlotKey.value || editingSlotIndex.value === -1) return
+  const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
+  if (editingActivity.value === null) return
+  currentList[editingSlotIndex.value] = copyAcitivityWithNewMemo(editingActivity.value, newMemo)
+  activities.set(editingSlotKey.value, currentList)
+  saveHistory()
+  closeEditModal()
 }
 
 const updateActivityCategory = (newCategoryKey: string) => {

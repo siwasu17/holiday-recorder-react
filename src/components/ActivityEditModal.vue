@@ -2,9 +2,14 @@
   <div v-if="show" class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-content">
       <h3>{{ categoryLabel }}</h3>
-      <p class="slot-info">{{ slotLabel }} の {{ slotIndex + 1 }}つ目</p>
+      <span class="slot-info">{{ slotLabel }} の {{ slotIndex + 1 }}つ目</span>
 
-      <div class="edit-actions">
+      <div class="memo-input-container">
+        <input id="memo-input" type="text" v-model="memo" placeholder="メモを入力" />
+        <button @click="$emit('update-activity-memo', memo)" class="save-memo-button">保存</button>
+      </div>
+
+      <div>
         <p>別のカテゴリに変更：</p>
         <div class="category-grid">
           <button
@@ -31,7 +36,7 @@
 
 <script setup lang="ts">
 import type { Activity, Category } from '@/types'
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps<{
   show: boolean
@@ -42,6 +47,16 @@ const props = defineProps<{
 }>()
 
 defineEmits(['close', 'update-activity-category', 'update-activity-memo', 'delete-activity'])
+
+const memo = ref(props.activity?.memo || '')
+
+// memoの初期化が最初しか動かないのでactivityが変わったら新たに初期化されるようにするためのwatch
+watch(
+  () => props.activity,
+  (newActivity) => {
+    memo.value = newActivity?.memo || ''
+  },
+)
 
 const categoryLabel = computed(() => {
   return props.categories.find((c) => c.key == props.activity?.categoryKey)?.label ?? '不明'
