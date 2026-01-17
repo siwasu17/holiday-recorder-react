@@ -30,6 +30,17 @@
       </div>
     </main>
 
+    <ActivityEditModal
+      :show="isModalOpen"
+      :categories="categories"
+      :activity="editingActivity"
+      :slot-label="editingSlotKey"
+      :slot-index="editingSlotIndex"
+      @close="closeEditModal"
+      @update-activity-category="updateActivityCategory"
+      @delete-activity="deleteActivity"
+    />
+
     <TimeTrackerActionFooter
       :categories="categories"
       :can-undo="canUndo"
@@ -38,36 +49,6 @@
       @undo="undoAct"
       @redo="redoAct"
     />
-
-    <!-- Modal for editing activities -->
-    <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
-        <h3>{{ editingActLabel }}</h3>
-        <p class="slot-info">{{ editingSlotLabel }} の {{ editingIndex + 1 }}つ目</p>
-
-        <div class="edit-actions">
-          <p>別のカテゴリに変更：</p>
-          <div class="category-grid">
-            <button
-              v-for="category in categories"
-              :key="category.key"
-              class="mini-category-button"
-              :style="{ backgroundColor: category.color }"
-              @click="updateActivity(category.key)"
-            >
-              {{ category.label }}
-            </button>
-          </div>
-        </div>
-
-        <hr />
-
-        <div class="modal-footer">
-          <button @click="deleteActivity" class="danger-button">この活動を削除</button>
-          <button @click="closeModal" class="cancel-button">キャンセル</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -76,6 +57,7 @@ import { ref, computed, reactive, shallowReactive, onMounted } from 'vue'
 import type { TimeSlot, Category, Activity } from '@/types'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar.vue'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter.vue'
+import ActivityEditModal from '@/components/ActivityEditModal.vue'
 
 const currentDate = ref(new Date())
 const currentTimeSlot = ref<string | null>(null)
@@ -88,8 +70,13 @@ const actHistories = shallowReactive<ActivityMap[]>([new Map()])
 const actHistoriesIndex = ref(0)
 
 const isModalOpen = ref(false)
-const editingSlot = ref<string | null>(null)
-const editingIndex = ref<number | -1>(-1)
+const editingSlotKey = ref<string | null>(null)
+const editingSlotIndex = ref<number | -1>(-1)
+
+const editingActivity = computed(() => {
+  if (!editingSlotKey.value || editingSlotIndex.value === -1) return null
+  return activities.get(editingSlotKey.value)?.[editingSlotIndex.value] ?? null
+})
 
 const categories: Category[] = [
   { key: 'meal', label: '食事', color: '#FFE5D9' },
@@ -138,15 +125,6 @@ const isSlotSelected = computed(() => (slotStart: string) => {
 const canUndo = computed(() => actHistoriesIndex.value > 0)
 
 const canRedo = computed(() => actHistoriesIndex.value + 1 < actHistories.length)
-
-const editingSlotLabel = computed(() => {
-  return timeSlots.find((s) => s.start === editingSlot.value)?.label ?? ''
-})
-
-const editingActLabel = computed(() => {
-  const activity = activities.get(editingSlot.value ?? '')?.[editingIndex.value]
-  return categories.find((c) => c.key === activity?.categoryKey)?.label
-})
 
 const createActivity = (categoryKey: string): Activity => {
   return {
@@ -231,31 +209,31 @@ const selectTimeSlot = (timeSlotKey: string) => {
 }
 
 const openEditModal = (slotStart: string, index: number) => {
-  editingSlot.value = slotStart
-  editingIndex.value = index
+  editingSlotKey.value = slotStart
+  editingSlotIndex.value = index
   isModalOpen.value = true
 }
 
-const closeModal = () => {
+const closeEditModal = () => {
   isModalOpen.value = false
-  editingSlot.value = null
-  editingIndex.value = -1
+  editingSlotKey.value = null
+  editingSlotIndex.value = -1
 }
 
-const updateActivity = (newCategoryKey: string) => {
-  if (!editingSlot.value || editingIndex.value === -1) return
-  const currentList = [...(activities.get(editingSlot.value) ?? [])]
-  currentList[editingIndex.value] = createActivity(newCategoryKey)
-  activities.set(editingSlot.value, currentList)
+const updateActivityCategory = (newCategoryKey: string) => {
+  if (!editingSlotKey.value || editingSlotIndex.value === -1) return
+  const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
+  currentList[editingSlotIndex.value] = createActivity(newCategoryKey)
+  activities.set(editingSlotKey.value, currentList)
   saveHistory()
   closeModal()
 }
 
 const deleteActivity = () => {
-  if (!editingSlot.value || editingIndex.value === -1) return
-  const currentList = [...(activities.get(editingSlot.value) ?? [])]
-  currentList.splice(editingIndex.value, 1)
-  activities.set(editingSlot.value, currentList)
+  if (!editingSlotKey.value || editingSlotIndex.value === -1) return
+  const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
+  currentList.splice(editingSlotIndex.value, 1)
+  activities.set(editingSlotKey.value, currentList)
   saveHistory()
   closeModal()
 }
@@ -358,71 +336,5 @@ const resetHistoryAfterLoad = () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.modal-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.danger-button,
-.cancel-button {
-  border: none;
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.danger-button {
-  background-color: #ff4d4f;
-  color: white;
-}
-
-.cancel-button {
-  background: #f0f0f0;
-}
-
-.slot-info {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.modal-content .category-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.modal-content .mini-category-button {
-  padding: 8px 4px;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
 }
 </style>
