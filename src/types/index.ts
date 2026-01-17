@@ -9,7 +9,7 @@ export interface Category {
   color: string
 }
 
-export interface Task {
+export interface Activity {
   id: string
   categoryKey: string
   memo: string

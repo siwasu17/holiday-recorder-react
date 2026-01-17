@@ -18,12 +18,12 @@
           <div class="activity-cell" role="cell">
             <div
               class="activity-item"
-              v-for="(task, index) in activities.get(slot.start)"
+              v-for="(activity, index) in activities.get(slot.start)"
               :key="index"
-              :style="{ backgroundColor: getActColor(task.categoryKey) }"
+              :style="{ backgroundColor: getActColor(activity.categoryKey) }"
               @click.stop="openEditModal(slot.start, index)"
             >
-              {{ getActLabel(task.categoryKey) }}
+              {{ getActLabel(activity.categoryKey) }}
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, shallowReactive, onMounted } from 'vue'
-import type { TimeSlot, Category, Task } from '@/types'
+import type { TimeSlot, Category, Activity } from '@/types'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar.vue'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter.vue'
 
@@ -81,10 +81,10 @@ const currentDate = ref(new Date())
 const currentTimeSlot = ref<string | null>(null)
 const MAX_ACTIVITIES_PER_SLOT = 4
 
-type ActivityTasksMap = Map<string, Task[]>
+type ActivityMap = Map<string, Activity[]>
 
-const activities: ActivityTasksMap = reactive(new Map())
-const actHistories = shallowReactive<ActivityTasksMap[]>([new Map()])
+const activities: ActivityMap = reactive(new Map())
+const actHistories = shallowReactive<ActivityMap[]>([new Map()])
 const actHistoriesIndex = ref(0)
 
 const isModalOpen = ref(false)
@@ -144,11 +144,11 @@ const editingSlotLabel = computed(() => {
 })
 
 const editingActLabel = computed(() => {
-  const task = activities.get(editingSlot.value ?? '')?.[editingIndex.value]
-  return categories.find((c) => c.key === task?.categoryKey)?.label
+  const activity = activities.get(editingSlot.value ?? '')?.[editingIndex.value]
+  return categories.find((c) => c.key === activity?.categoryKey)?.label
 })
 
-const createTask = (categoryKey: string): Task => {
+const createActivity = (categoryKey: string): Activity => {
   return {
     id: crypto.randomUUID(),
     categoryKey,
@@ -174,13 +174,13 @@ const changeDay = (days: number) => {
 const previousDay = () => changeDay(-1)
 const nextDay = () => changeDay(1)
 
-const selectCategory = (taskCategory: string) => {
+const selectCategory = (categoryKey: string) => {
   if (!currentTimeSlot.value) return
   const timeSlot = currentTimeSlot.value
   const currentActivitiesInSlot = [...(activities.get(timeSlot) ?? [])]
 
   if (currentActivitiesInSlot.length < MAX_ACTIVITIES_PER_SLOT) {
-    currentActivitiesInSlot.push(createTask(taskCategory))
+    currentActivitiesInSlot.push(createActivity(categoryKey))
     activities.set(timeSlot, currentActivitiesInSlot)
     saveHistory()
   }
@@ -245,7 +245,7 @@ const closeModal = () => {
 const updateActivity = (newCategoryKey: string) => {
   if (!editingSlot.value || editingIndex.value === -1) return
   const currentList = [...(activities.get(editingSlot.value) ?? [])]
-  currentList[editingIndex.value] = createTask(newCategoryKey)
+  currentList[editingIndex.value] = createActivity(newCategoryKey)
   activities.set(editingSlot.value, currentList)
   saveHistory()
   closeModal()
@@ -273,8 +273,8 @@ const loadFromLocalStorage = () => {
   activities.clear()
   if (saved) {
     const dataObj = JSON.parse(saved)
-    for (const [slot, tasks] of Object.entries(dataObj) as [string, Task[]][]) {
-      activities.set(slot, tasks)
+    for (const [slot, activitiesData] of Object.entries(dataObj) as [string, Activity[]][]) {
+      activities.set(slot, activitiesData)
     }
   }
   resetHistoryAfterLoad()
