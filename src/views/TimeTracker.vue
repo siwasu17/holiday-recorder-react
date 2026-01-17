@@ -23,7 +23,10 @@
               :style="{ backgroundColor: getActColor(activity.categoryKey) }"
               @click.stop="openEditModal(slot.start, index)"
             >
-              {{ getActLabel(activity.categoryKey) }}
+              <span class="activity-label">{{ getActLabel(activity.categoryKey) }}</span>
+              <div v-if="activity.memo" class="memo-label">
+                {{ activity.memo }}
+              </div>
             </div>
           </div>
         </div>
