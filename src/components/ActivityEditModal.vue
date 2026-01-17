@@ -1,8 +1,10 @@
 <template>
   <div v-if="show" class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-content">
-      <h3>{{ categoryLabel }}</h3>
-      <span class="slot-info">{{ slotLabel }} の {{ slotIndex + 1 }}つ目</span>
+      <div class="header-container">
+        <div class="category-label">{{ categoryLabel }}</div>
+        <span class="slot-info">{{ slotLabel }} の {{ slotIndex + 1 }}つ目</span>
+      </div>
 
       <div class="memo-input-container">
         <input id="memo-input" type="text" v-model="memo" placeholder="メモを入力" />
@@ -86,6 +88,18 @@ const categoryLabel = computed(() => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
+.header-container {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.category-label {
+  font-size: 1.5rem; /* 少し大きめに */
+  color: #333; /* 濃いめの色 */
+}
+
 .modal-footer {
   display: flex;
   flex-direction: column;
@@ -112,7 +126,37 @@ const categoryLabel = computed(() => {
 
 .slot-info {
   color: #666;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+}
+
+.memo-input-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.memo-input-container input#memo-input {
+  flex-grow: 1;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.save-memo-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.save-memo-button:hover {
+  background-color: #0056b3;
 }
 
 .modal-content .category-grid {
