@@ -226,7 +226,7 @@ const updateActivityCategory = (newCategoryKey: string) => {
   currentList[editingSlotIndex.value] = createActivity(newCategoryKey)
   activities.set(editingSlotKey.value, currentList)
   saveHistory()
-  closeModal()
+  closeEditModal()
 }
 
 const deleteActivity = () => {
@@ -235,7 +235,7 @@ const deleteActivity = () => {
   currentList.splice(editingSlotIndex.value, 1)
   activities.set(editingSlotKey.value, currentList)
   saveHistory()
-  closeModal()
+  closeEditModal()
 }
 
 const getDateKey = (date: Date) => date.toISOString().split('T')[0]
