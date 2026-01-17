@@ -18,12 +18,12 @@
           <div class="activity-cell" role="cell">
             <div
               class="activity-item"
-              v-for="(actKey, index) in activities.get(slot.start)"
+              v-for="(task, index) in activities.get(slot.start)"
               :key="index"
-              :style="{ backgroundColor: getActColor(actKey) }"
+              :style="{ backgroundColor: getActColor(task.categoryKey) }"
               @click.stop="openEditModal(slot.start, index)"
             >
-              {{ getActLabel(actKey) }}
+              {{ getActLabel(task.categoryKey) }}
             </div>
           </div>
         </div>
@@ -73,6 +73,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, shallowReactive, onMounted } from 'vue'
+import type { TimeSlot, Category, Task } from '@/types'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar.vue'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter.vue'
 
@@ -80,7 +81,7 @@ const currentDate = ref(new Date())
 const currentTimeSlot = ref<string | null>(null)
 const MAX_ACTIVITIES_PER_SLOT = 4
 
-type ActivityTasksMap = Map<string, string[]>
+type ActivityTasksMap = Map<string, Task[]>
 
 const activities: ActivityTasksMap = reactive(new Map())
 const actHistories = shallowReactive<ActivityTasksMap[]>([new Map()])
@@ -90,7 +91,7 @@ const isModalOpen = ref(false)
 const editingSlot = ref<string | null>(null)
 const editingIndex = ref<number | -1>(-1)
 
-const categories = [
+const categories: Category[] = [
   { key: 'meal', label: '食事', color: '#FFE5D9' },
   { key: 'rest', label: '休息', color: '#D6EFFF' },
   { key: 'exercise', label: '運動', color: '#E2F0CB' },
@@ -105,7 +106,7 @@ const categories = [
   { key: 'nop', label: '余白', color: '#E0E0E0' },
 ]
 
-const timeSlots = [
+const timeSlots: TimeSlot[] = [
   { start: '08:00', label: '8 - 10' },
   { start: '10:00', label: '10 - 12' },
   { start: '12:00', label: '12 - 14' },
@@ -143,16 +144,24 @@ const editingSlotLabel = computed(() => {
 })
 
 const editingActLabel = computed(() => {
-  const actKey = activities.get(editingSlot.value ?? '')?.[editingIndex.value]
-  return categories.find((c) => c.key === actKey)?.label
+  const task = activities.get(editingSlot.value ?? '')?.[editingIndex.value]
+  return categories.find((c) => c.key === task?.categoryKey)?.label
 })
 
-const getActLabel = (actKey: string) => {
-  return categories.find((c) => c.key == actKey)?.label ?? '不明'
+const createTask = (categoryKey: string): Task => {
+  return {
+    id: crypto.randomUUID(),
+    categoryKey,
+    memo: '',
+  }
 }
 
-const getActColor = (actKey: string) => {
-  return categories.find((c) => c.key == actKey)?.color ?? '#000000'
+const getActLabel = (categoryKey: string) => {
+  return categories.find((c) => c.key == categoryKey)?.label ?? '不明'
+}
+
+const getActColor = (categoryKey: string) => {
+  return categories.find((c) => c.key == categoryKey)?.color ?? '#000000'
 }
 
 const changeDay = (days: number) => {
@@ -171,7 +180,7 @@ const selectCategory = (taskCategory: string) => {
   const currentActivitiesInSlot = [...(activities.get(timeSlot) ?? [])]
 
   if (currentActivitiesInSlot.length < MAX_ACTIVITIES_PER_SLOT) {
-    currentActivitiesInSlot.push(taskCategory)
+    currentActivitiesInSlot.push(createTask(taskCategory))
     activities.set(timeSlot, currentActivitiesInSlot)
     saveHistory()
   }
@@ -233,10 +242,10 @@ const closeModal = () => {
   editingIndex.value = -1
 }
 
-const updateActivity = (newActKey: string) => {
+const updateActivity = (newCategoryKey: string) => {
   if (!editingSlot.value || editingIndex.value === -1) return
   const currentList = [...(activities.get(editingSlot.value) ?? [])]
-  currentList[editingIndex.value] = newActKey
+  currentList[editingIndex.value] = createTask(newCategoryKey)
   activities.set(editingSlot.value, currentList)
   saveHistory()
   closeModal()
@@ -264,7 +273,7 @@ const loadFromLocalStorage = () => {
   activities.clear()
   if (saved) {
     const dataObj = JSON.parse(saved)
-    for (const [slot, tasks] of Object.entries(dataObj) as [string, string[]][]) {
+    for (const [slot, tasks] of Object.entries(dataObj) as [string, Task[]][]) {
       activities.set(slot, tasks)
     }
   }
