@@ -1,12 +1,8 @@
 <template>
   <div class="tracker-action-footer">
     <div class="history-controls-inline">
-      <button @click="$emit('undo')" :disabled="!canUndo" class="history-mini-button">
-        ↩ Undo
-      </button>
-      <button @click="$emit('redo')" :disabled="!canRedo" class="history-mini-button">
-        Redo ↪
-      </button>
+      <button @click="$emit('undo')" :disabled="!canUndo" class="history-mini-button">↩ Undo</button>
+      <button @click="$emit('redo')" :disabled="!canRedo" class="history-mini-button">Redo ↪</button>
     </div>
     <div class="category-grid">
       <button
@@ -23,11 +19,7 @@
 </template>
 
 <script setup lang="ts">
-interface Category {
-  key: string
-  label: string
-  color: string
-}
+import type { Category } from '@/types'
 
 defineProps<{
   categories: Category[]

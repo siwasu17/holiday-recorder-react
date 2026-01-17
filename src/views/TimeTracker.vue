@@ -18,17 +18,32 @@
           <div class="activity-cell" role="cell">
             <div
               class="activity-item"
-              v-for="(actKey, index) in activities.get(slot.start)"
+              v-for="(activity, index) in activities.get(slot.start)"
               :key="index"
-              :style="{ backgroundColor: getActColor(actKey) }"
+              :style="{ backgroundColor: getActColor(activity.categoryKey) }"
               @click.stop="openEditModal(slot.start, index)"
             >
-              {{ getActLabel(actKey) }}
+              <span class="activity-label">{{ getActLabel(activity.categoryKey) }}</span>
+              <div v-if="activity.memo" class="memo-label">
+                {{ activity.memo }}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </main>
+
+    <ActivityEditModal
+      :show="isModalOpen"
+      :categories="categories"
+      :activity="editingActivity"
+      :slot-label="editingSlotKey"
+      :slot-index="editingSlotIndex"
+      @close="closeEditModal"
+      @update-activity-category="updateActivityCategory"
+      @update-activity-memo="updateActivityMemo"
+      @delete-activity="deleteActivity"
+    />
 
     <TimeTrackerActionFooter
       :categories="categories"
@@ -38,59 +53,36 @@
       @undo="undoAct"
       @redo="redoAct"
     />
-
-    <!-- Modal for editing activities -->
-    <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
-        <h3>{{ editingActLabel }}</h3>
-        <p class="slot-info">{{ editingSlotLabel }} の {{ editingIndex + 1 }}つ目</p>
-
-        <div class="edit-actions">
-          <p>別のカテゴリに変更：</p>
-          <div class="category-grid">
-            <button
-              v-for="category in categories"
-              :key="category.key"
-              class="mini-category-button"
-              :style="{ backgroundColor: category.color }"
-              @click="updateActivity(category.key)"
-            >
-              {{ category.label }}
-            </button>
-          </div>
-        </div>
-
-        <hr />
-
-        <div class="modal-footer">
-          <button @click="deleteActivity" class="danger-button">この活動を削除</button>
-          <button @click="closeModal" class="cancel-button">キャンセル</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, reactive, shallowReactive, onMounted } from 'vue'
+import type { TimeSlot, Category, Activity } from '@/types'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar.vue'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter.vue'
+import ActivityEditModal from '@/components/ActivityEditModal.vue'
 
 const currentDate = ref(new Date())
 const currentTimeSlot = ref<string | null>(null)
 const MAX_ACTIVITIES_PER_SLOT = 4
 
-type ActivityTasksMap = Map<string, string[]>
+type ActivityMap = Map<string, Activity[]>
 
-const activities: ActivityTasksMap = reactive(new Map())
-const actHistories = shallowReactive<ActivityTasksMap[]>([new Map()])
+const activities: ActivityMap = reactive(new Map())
+const actHistories = shallowReactive<ActivityMap[]>([new Map()])
 const actHistoriesIndex = ref(0)
 
 const isModalOpen = ref(false)
-const editingSlot = ref<string | null>(null)
-const editingIndex = ref<number | -1>(-1)
+const editingSlotKey = ref<string | null>(null)
+const editingSlotIndex = ref<number | -1>(-1)
 
-const categories = [
+const editingActivity = computed(() => {
+  if (!editingSlotKey.value || editingSlotIndex.value === -1) return null
+  return activities.get(editingSlotKey.value)?.[editingSlotIndex.value] ?? null
+})
+
+const categories: Category[] = [
   { key: 'meal', label: '食事', color: '#FFE5D9' },
   { key: 'rest', label: '休息', color: '#D6EFFF' },
   { key: 'exercise', label: '運動', color: '#E2F0CB' },
@@ -105,7 +97,7 @@ const categories = [
   { key: 'nop', label: '余白', color: '#E0E0E0' },
 ]
 
-const timeSlots = [
+const timeSlots: TimeSlot[] = [
   { start: '08:00', label: '8 - 10' },
   { start: '10:00', label: '10 - 12' },
   { start: '12:00', label: '12 - 14' },
@@ -138,21 +130,28 @@ const canUndo = computed(() => actHistoriesIndex.value > 0)
 
 const canRedo = computed(() => actHistoriesIndex.value + 1 < actHistories.length)
 
-const editingSlotLabel = computed(() => {
-  return timeSlots.find((s) => s.start === editingSlot.value)?.label ?? ''
-})
-
-const editingActLabel = computed(() => {
-  const actKey = activities.get(editingSlot.value ?? '')?.[editingIndex.value]
-  return categories.find((c) => c.key === actKey)?.label
-})
-
-const getActLabel = (actKey: string) => {
-  return categories.find((c) => c.key == actKey)?.label ?? '不明'
+const createActivity = (categoryKey: string): Activity => {
+  return {
+    id: crypto.randomUUID(),
+    categoryKey,
+    memo: '',
+  }
 }
 
-const getActColor = (actKey: string) => {
-  return categories.find((c) => c.key == actKey)?.color ?? '#000000'
+const copyAcitivityWithNewMemo = (srcActivity: Activity, newMemo: string): Activity => {
+  return {
+    id: srcActivity.id,
+    categoryKey: srcActivity.categoryKey,
+    memo: newMemo,
+  }
+}
+
+const getActLabel = (categoryKey: string) => {
+  return categories.find((c) => c.key == categoryKey)?.label ?? '不明'
+}
+
+const getActColor = (categoryKey: string) => {
+  return categories.find((c) => c.key == categoryKey)?.color ?? '#000000'
 }
 
 const changeDay = (days: number) => {
@@ -165,13 +164,13 @@ const changeDay = (days: number) => {
 const previousDay = () => changeDay(-1)
 const nextDay = () => changeDay(1)
 
-const selectCategory = (taskCategory: string) => {
+const selectCategory = (categoryKey: string) => {
   if (!currentTimeSlot.value) return
   const timeSlot = currentTimeSlot.value
   const currentActivitiesInSlot = [...(activities.get(timeSlot) ?? [])]
 
   if (currentActivitiesInSlot.length < MAX_ACTIVITIES_PER_SLOT) {
-    currentActivitiesInSlot.push(taskCategory)
+    currentActivitiesInSlot.push(createActivity(categoryKey))
     activities.set(timeSlot, currentActivitiesInSlot)
     saveHistory()
   }
@@ -222,33 +221,43 @@ const selectTimeSlot = (timeSlotKey: string) => {
 }
 
 const openEditModal = (slotStart: string, index: number) => {
-  editingSlot.value = slotStart
-  editingIndex.value = index
+  editingSlotKey.value = slotStart
+  editingSlotIndex.value = index
   isModalOpen.value = true
 }
 
-const closeModal = () => {
+const closeEditModal = () => {
   isModalOpen.value = false
-  editingSlot.value = null
-  editingIndex.value = -1
+  editingSlotKey.value = null
+  editingSlotIndex.value = -1
 }
 
-const updateActivity = (newActKey: string) => {
-  if (!editingSlot.value || editingIndex.value === -1) return
-  const currentList = [...(activities.get(editingSlot.value) ?? [])]
-  currentList[editingIndex.value] = newActKey
-  activities.set(editingSlot.value, currentList)
+const updateActivityMemo = (newMemo: string) => {
+  if (!editingSlotKey.value || editingSlotIndex.value === -1) return
+  const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
+  if (editingActivity.value === null) return
+  currentList[editingSlotIndex.value] = copyAcitivityWithNewMemo(editingActivity.value, newMemo)
+  activities.set(editingSlotKey.value, currentList)
   saveHistory()
-  closeModal()
+  closeEditModal()
+}
+
+const updateActivityCategory = (newCategoryKey: string) => {
+  if (!editingSlotKey.value || editingSlotIndex.value === -1) return
+  const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
+  currentList[editingSlotIndex.value] = createActivity(newCategoryKey)
+  activities.set(editingSlotKey.value, currentList)
+  saveHistory()
+  closeEditModal()
 }
 
 const deleteActivity = () => {
-  if (!editingSlot.value || editingIndex.value === -1) return
-  const currentList = [...(activities.get(editingSlot.value) ?? [])]
-  currentList.splice(editingIndex.value, 1)
-  activities.set(editingSlot.value, currentList)
+  if (!editingSlotKey.value || editingSlotIndex.value === -1) return
+  const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
+  currentList.splice(editingSlotIndex.value, 1)
+  activities.set(editingSlotKey.value, currentList)
   saveHistory()
-  closeModal()
+  closeEditModal()
 }
 
 const getDateKey = (date: Date) => date.toISOString().split('T')[0]
@@ -264,8 +273,8 @@ const loadFromLocalStorage = () => {
   activities.clear()
   if (saved) {
     const dataObj = JSON.parse(saved)
-    for (const [slot, tasks] of Object.entries(dataObj) as [string, string[]][]) {
-      activities.set(slot, tasks)
+    for (const [slot, activitiesData] of Object.entries(dataObj) as [string, Activity[]][]) {
+      activities.set(slot, activitiesData)
     }
   }
   resetHistoryAfterLoad()
@@ -338,6 +347,7 @@ const resetHistoryAfterLoad = () => {
 .activity-item {
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -351,69 +361,16 @@ const resetHistoryAfterLoad = () => {
   text-overflow: ellipsis;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.modal-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.danger-button,
-.cancel-button {
-  border: none;
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.danger-button {
-  background-color: #ff4d4f;
-  color: white;
-}
-
-.cancel-button {
-  background: #f0f0f0;
-}
-
-.slot-info {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.modal-content .category-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.modal-content .mini-category-button {
-  padding: 8px 4px;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
+.memo-label {
+  background-color: white;
+  font-size: 0.8em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-top: 2px;
+  color: #333;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
