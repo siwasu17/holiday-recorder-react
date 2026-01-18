@@ -138,14 +138,6 @@ const createActivity = (categoryKey: string): Activity => {
   }
 }
 
-const copyAcitivityWithNewMemo = (srcActivity: Activity, newMemo: string): Activity => {
-  return {
-    id: srcActivity.id,
-    categoryKey: srcActivity.categoryKey,
-    memo: newMemo,
-  }
-}
-
 const getActLabel = (categoryKey: string) => {
   return categories.find((c) => c.key == categoryKey)?.label ?? '不明'
 }
@@ -232,32 +224,38 @@ const closeEditModal = () => {
   editingSlotIndex.value = -1
 }
 
-const updateActivityMemo = (newMemo: string) => {
+// Activity更新の処理のテンプレートが記載されている関数
+// 編集しているtimeSlotに対応するactivityリストをどのように変えるかはupdaterのラムダを渡すことで可変にできる
+const updateActivity = (updater: (list: Activity[]) => Activity[]) => {
   if (!editingSlotKey.value || editingSlotIndex.value === -1) return
   const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
-  if (editingActivity.value === null) return
-  currentList[editingSlotIndex.value] = copyAcitivityWithNewMemo(editingActivity.value, newMemo)
-  activities.set(editingSlotKey.value, currentList)
+  activities.set(editingSlotKey.value, updater(currentList))
   saveHistory()
   closeEditModal()
+}
+
+const updateActivityMemo = (newMemo: string) => {
+  if (!editingActivity.value) return
+  const activity = editingActivity.value
+  updateActivity((list) => {
+    // activityを複製して、memoだけ更新する
+    list[editingSlotIndex.value] = { ...activity, memo: newMemo }
+    return list
+  })
 }
 
 const updateActivityCategory = (newCategoryKey: string) => {
-  if (!editingSlotKey.value || editingSlotIndex.value === -1) return
-  const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
-  currentList[editingSlotIndex.value] = createActivity(newCategoryKey)
-  activities.set(editingSlotKey.value, currentList)
-  saveHistory()
-  closeEditModal()
+  updateActivity((list) => {
+    list[editingSlotIndex.value] = createActivity(newCategoryKey)
+    return list
+  })
 }
 
 const deleteActivity = () => {
-  if (!editingSlotKey.value || editingSlotIndex.value === -1) return
-  const currentList = [...(activities.get(editingSlotKey.value) ?? [])]
-  currentList.splice(editingSlotIndex.value, 1)
-  activities.set(editingSlotKey.value, currentList)
-  saveHistory()
-  closeEditModal()
+  updateActivity((list) => {
+    list.splice(editingSlotIndex.value, 1)
+    return list
+  })
 }
 
 const getDateKey = (date: Date) => date.toISOString().split('T')[0]
