@@ -6,11 +6,6 @@
         <span class="slot-info">{{ slotLabel }} の {{ slotIndex + 1 }}つ目</span>
       </div>
 
-      <div class="memo-input-container">
-        <input id="memo-input" type="text" v-model="memo" placeholder="メモを入力" />
-        <button @click="$emit('update-activity-memo', memo)" class="save-memo-button">保存</button>
-      </div>
-
       <div>
         <p>別のカテゴリに変更：</p>
         <div class="category-grid">
@@ -24,6 +19,11 @@
             {{ category.label }}
           </button>
         </div>
+      </div>
+
+      <div class="memo-input-container">
+        <input id="memo-input" type="text" v-model="memo" placeholder="メモを入力" />
+        <button @click="$emit('update-activity-memo', memo)" class="save-memo-button">保存</button>
       </div>
 
       <hr />
@@ -132,7 +132,7 @@ const categoryLabel = computed(() => {
 .memo-input-container {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-top: 20px;
   align-items: center;
 }
 
