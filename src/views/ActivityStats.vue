@@ -83,7 +83,7 @@ const chartOptions = {
       stacked: true,
       title: {
         display: true,
-        text: '合計時間 (時間)',
+        text: '合計時間',
       },
     },
   },
