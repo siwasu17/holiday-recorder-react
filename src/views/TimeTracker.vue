@@ -258,7 +258,16 @@ const deleteActivity = () => {
   })
 }
 
-const getDateKey = (date: Date) => date.toISOString().split('T')[0]
+const getDateKey = (date: Date) => {
+  // sv-SEはスウェーデン形式だがYYYY-MM-DDにできる
+  // タイムゾーンは日本にする
+  return new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
 
 const saveToLocalStorage = () => {
   const key = `activities-${getDateKey(currentDate.value)}`
