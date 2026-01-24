@@ -129,9 +129,14 @@ const loadActivities = () => {
 
   const datasets = categories
     .map((category) => {
-      const data = sortedDates.map(
-        (date) => (dailyData[getDateKey(date)][category.key] || 0) * (MINUTES_PER_ACTIVITY / 60),
-      )
+      const data = sortedDates.map((date) => {
+        const data = dailyData[getDateKey(date)]
+        if (data) {
+          return (data[category.key] || 0) * (MINUTES_PER_ACTIVITY / 60)
+        } else {
+          return 0
+        }
+      })
       return {
         label: category.label,
         backgroundColor: category.color,
