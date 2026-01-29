@@ -2,15 +2,22 @@
   <div class="tracker-toolbar">
     <div class="date-navigation">
       <button @click="$emit('previous-day')" class="nav-button">&lt; Prev</button>
-      <div class="current-date">{{ formattedDate }}</div>
+      <div class="current-date">
+        {{ formattedDate }}
+        <label class="holiday-toggle">
+          <input type="checkbox" :checked="props.isHoliday" />
+          <span>休日</span>
+        </label>
+      </div>
       <button @click="$emit('next-day')" class="nav-button">Next &gt;</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   formattedDate: string
+  isHoliday: boolean
 }>()
 
 defineEmits(['previous-day', 'next-day'])
@@ -57,5 +64,20 @@ defineEmits(['previous-day', 'next-day'])
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.05em;
+}
+
+.holiday-toggle {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  font-weight: normal;
+}
+
+.holiday-toggle input {
+  margin: 0 4px 0 0;
+  width: 12px;
+  height: 12px;
 }
 </style>

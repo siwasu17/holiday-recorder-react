@@ -1,6 +1,11 @@
 <template>
   <div class="tracker-container">
-    <TimeTrackerToolbar :formatted-date="formattedDate" @previous-day="previousDay" @next-day="nextDay" />
+    <TimeTrackerToolbar
+      :formatted-date="formattedDate"
+      :is-holiday="isHoliday"
+      @previous-day="previousDay"
+      @next-day="nextDay"
+    />
 
     <main class="main-content-scrollable">
       <div class="timetable" role="table">
@@ -82,6 +87,13 @@ const editingActivity = computed(() => {
   return activities.get(editingSlotKey.value)?.[editingSlotIndex.value] ?? null
 })
 
+// 日付をキー、休日ならtrue / 平日ならfalse
+// '2026-01-01': true,
+// '2026-01-10': false,
+const userDefinedHolidayMap = ref<Record<string, boolean>>({
+  '2026-01-30': true,
+})
+
 const categories: Category[] = [
   { key: 'meal', label: '食事', color: '#FFE5D9' },
   { key: 'rest', label: '休息', color: '#D6EFFF' },
@@ -120,6 +132,25 @@ const formattedDate = computed(() => {
     day: '2-digit',
     weekday: 'short',
   })
+})
+
+const isHoliday = computed(() => {
+  const dateKey = getDateKey(currentDate.value)
+
+  // 明示的に休日/平日が記録されているものはそれに従う
+  const userDefinedHoliday = userDefinedHolidayMap.value[dateKey]
+  if (!!userDefinedHoliday) {
+    return userDefinedHoliday
+  }
+
+  // 土日は休日扱い
+  const dayOfWeek = currentDate.value.getDay()
+
+  if (dayOfWeek == 0 || dayOfWeek == 6) {
+    return true
+  } else {
+    return false
+  }
 })
 
 const isSlotSelected = computed(() => (slotStart: string) => {
