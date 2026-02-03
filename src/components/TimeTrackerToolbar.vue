@@ -5,7 +5,7 @@
       <div class="current-date">
         {{ formattedDate }}
         <label class="holiday-toggle">
-          <input type="checkbox" :checked="props.isHoliday" />
+          <input type="checkbox" :checked="props.isHoliday" @click="$emit('toggle-holiday')" />
           <span>休日</span>
         </label>
       </div>
@@ -20,7 +20,7 @@ const props = defineProps<{
   isHoliday: boolean
 }>()
 
-defineEmits(['previous-day', 'next-day'])
+defineEmits(['previous-day', 'next-day', 'toggle-holiday'])
 </script>
 
 <style scoped>

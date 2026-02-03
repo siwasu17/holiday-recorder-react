@@ -5,6 +5,7 @@
       :is-holiday="isHoliday"
       @previous-day="previousDay"
       @next-day="nextDay"
+      @toggle-holiday="saveUserDefinedHoliday"
     />
 
     <main class="main-content-scrollable">
@@ -90,9 +91,7 @@ const editingActivity = computed(() => {
 // 日付をキー、休日ならtrue / 平日ならfalse
 // '2026-01-01': true,
 // '2026-01-10': false,
-const userDefinedHolidayMap = ref<Record<string, boolean>>({
-  '2026-01-30': true,
-})
+const userDefinedHolidayMap = ref<Record<string, boolean>>({})
 
 const categories: Category[] = [
   { key: 'meal', label: '食事', color: '#FFE5D9' },
@@ -123,6 +122,7 @@ const timeSlots: TimeSlot[] = [
 
 onMounted(() => {
   loadFromLocalStorage()
+  loadHolidayMapFromLocalStorage()
 })
 
 const formattedDate = computed(() => {
@@ -139,18 +139,13 @@ const isHoliday = computed(() => {
 
   // 明示的に休日/平日が記録されているものはそれに従う
   const userDefinedHoliday = userDefinedHolidayMap.value[dateKey]
-  if (!!userDefinedHoliday) {
+  if (userDefinedHoliday !== undefined) {
     return userDefinedHoliday
   }
 
   // 土日は休日扱い
   const dayOfWeek = currentDate.value.getDay()
-
-  if (dayOfWeek == 0 || dayOfWeek == 6) {
-    return true
-  } else {
-    return false
-  }
+  return dayOfWeek === 0 || dayOfWeek === 6
 })
 
 const isSlotSelected = computed(() => (slotStart: string) => {
@@ -186,6 +181,22 @@ const changeDay = (days: number) => {
 
 const previousDay = () => changeDay(-1)
 const nextDay = () => changeDay(1)
+
+const saveUserDefinedHoliday = () => {
+  const dateKey = getDateKey(currentDate.value)
+
+  // ユーザー定義の休日設定がある場合
+  if (userDefinedHolidayMap.value[dateKey] !== undefined) {
+    // 設定を削除し、曜日ベースのデフォルト判定に戻す
+    delete userDefinedHolidayMap.value[dateKey]
+  } else {
+    // ユーザー定義の設定がない場合
+    // 現在の isHoliday (曜日ベースで判定されている) とは逆の状態を保存する
+    // これにより、土日を平日にしたり、平日を休日にしたりできる
+    userDefinedHolidayMap.value[dateKey] = !isHoliday.value
+  }
+  saveHolidayMapToLocalStorage()
+}
 
 const selectCategory = (categoryKey: string) => {
   if (!currentTimeSlot.value) return
@@ -303,6 +314,17 @@ const getDateKey = (date: Date) => {
 const saveToLocalStorage = () => {
   const key = `activities-${getDateKey(currentDate.value)}`
   localStorage.setItem(key, JSON.stringify(Object.fromEntries(activities)))
+}
+
+const saveHolidayMapToLocalStorage = () => {
+  localStorage.setItem('userDefinedHolidayMap', JSON.stringify(userDefinedHolidayMap.value))
+}
+
+const loadHolidayMapFromLocalStorage = () => {
+  const saved = localStorage.getItem('userDefinedHolidayMap')
+  if (saved) {
+    userDefinedHolidayMap.value = JSON.parse(saved)
+  }
 }
 
 const loadFromLocalStorage = () => {
