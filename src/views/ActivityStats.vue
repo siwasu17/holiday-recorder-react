@@ -132,6 +132,8 @@ const createChartData = (
   })
 
   const datasets = categories
+    // nopは除外
+    .filter((category) => category.key !== 'nop')
     .map((category) => {
       const data = sortedDates
         .map((date) => {
