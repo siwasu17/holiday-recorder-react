@@ -3,7 +3,8 @@
     <div class="modal-content">
       <div class="header-container">
         <div class="category-label">{{ categoryLabel }}</div>
-        <span class="slot-info">{{ slotLabel }} の {{ slotIndex + 1 }}つ目</span>
+        <span class="slot-info">{{ slotLabel }} #{{ slotIndex + 1 }}</span>
+        <button @click="$emit('delete-activity')" class="delete-button">削除</button>
       </div>
 
       <div>
@@ -23,13 +24,10 @@
 
       <div class="memo-input-container">
         <input id="memo-input" type="text" v-model="memo" placeholder="メモを入力" />
-        <button @click="$emit('update-activity-memo', memo)" class="save-memo-button">保存</button>
       </div>
 
-      <hr />
-
       <div class="modal-footer">
-        <button @click="$emit('delete-activity')" class="danger-button">この活動を削除</button>
+        <button @click="$emit('update-activity-memo', memo)" class="save-memo-button">保存</button>
         <button @click="$emit('close')" class="cancel-button">キャンセル</button>
       </div>
     </div>
@@ -93,6 +91,7 @@ const categoryLabel = computed(() => {
   align-items: baseline;
   gap: 10px;
   margin-bottom: 15px;
+  justify-content: space-between;
 }
 
 .category-label {
@@ -107,7 +106,7 @@ const categoryLabel = computed(() => {
   margin-top: 20px;
 }
 
-.danger-button,
+.delete-button,
 .cancel-button {
   border: none;
   padding: 10px;
@@ -115,7 +114,7 @@ const categoryLabel = computed(() => {
   cursor: pointer;
 }
 
-.danger-button {
+.delete-button {
   background-color: #ff4d4f;
   color: white;
 }
