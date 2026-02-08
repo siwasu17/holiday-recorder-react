@@ -45,7 +45,6 @@ const categories: Category[] = [
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
-const MINUTES_PER_ACTIVITY = 30
 const aDayOfMillsec = 24 * 60 * 60 * 1000
 
 const userDefinedHolidayMap = ref<Record<string, boolean>>({})
@@ -120,7 +119,7 @@ const isHoliday = (date: Date) => {
 
 const createChartData = (
   datesWithData: Date[],
-  dailyData: { [dateKey: string]: { [categoryKey: string]: number } },
+  dailyActivityDurations: { [dateKey: string]: { [categoryKey: string]: number } },
 ) => {
   const today = new Date()
   const sortedDates = [...datesWithData].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
@@ -137,8 +136,9 @@ const createChartData = (
     .map((category) => {
       const data = sortedDates
         .map((date) => {
-          const dateData = dailyData[getDateKey(date)]
-          return dateData ? (dateData[category.key] || 0) * (MINUTES_PER_ACTIVITY / 60) : 0
+          const dateData = dailyActivityDurations[getDateKey(date)]
+          // Data already contains durations in minutes, convert to hours here.
+          return dateData ? (dateData[category.key] || 0) / 60 : 0
         })
         .reverse()
 
@@ -156,8 +156,8 @@ const createChartData = (
 
 const loadActivities = () => {
   const today = new Date()
-  const holidayDailyData: { [dateKey: string]: { [categoryKey: string]: number } } = {}
-  const weekdayDailyData: { [dateKey: string]: { [categoryKey: string]: number } } = {}
+  const holidayDailyActivityDurations: { [dateKey: string]: { [categoryKey: string]: number } } = {}
+  const weekdayDailyActivityDurations: { [dateKey: string]: { [categoryKey: string]: number } } = {}
   const holidayDatesWithData: Date[] = []
   const weekdayDatesWithData: Date[] = []
 
@@ -169,24 +169,40 @@ const loadActivities = () => {
     const saved = localStorage.getItem(storageKey)
 
     if (saved) {
-      const dataObj = JSON.parse(saved)
-      const activities = Object.values(dataObj).flat() as Activity[]
-      if (activities.length > 0) {
-        const targetDailyData = isHoliday(date) ? holidayDailyData : weekdayDailyData
-        const targetDatesWithData = isHoliday(date) ? holidayDatesWithData : weekdayDatesWithData
+      const timeSlotsData = JSON.parse(saved) // This will be the object with timeSlot keys
 
-        targetDatesWithData.push(date)
-        targetDailyData[dateKey] = {}
-        for (const activity of activities) {
-          const categoryKey = activity.categoryKey
-          targetDailyData[dateKey][categoryKey] = (targetDailyData[dateKey][categoryKey] || 0) + 1
+      let totalActivitiesInDay = 0
+      const currentDayDurations: { [categoryKey: string]: number } = {}
+
+      for (const slotKey in timeSlotsData) {
+        const activitiesInSlot = timeSlotsData[slotKey] as Activity[]
+        const numActivitiesInSlot = activitiesInSlot.length
+
+        if (numActivitiesInSlot > 0) {
+          totalActivitiesInDay += numActivitiesInSlot
+          const durationPerActivity = 120 / numActivitiesInSlot // minutes
+
+          for (const activity of activitiesInSlot) {
+            const categoryKey = activity.categoryKey
+            currentDayDurations[categoryKey] = (currentDayDurations[categoryKey] || 0) + durationPerActivity
+          }
+        }
+      }
+
+      if (totalActivitiesInDay > 0) {
+        if (isHoliday(date)) {
+          holidayDatesWithData.push(date)
+          holidayDailyActivityDurations[dateKey] = currentDayDurations
+        } else {
+          weekdayDatesWithData.push(date)
+          weekdayDailyActivityDurations[dateKey] = currentDayDurations
         }
       }
     }
   }
 
-  holidayChartData.value = createChartData(holidayDatesWithData, holidayDailyData)
-  weekdayChartData.value = createChartData(weekdayDatesWithData, weekdayDailyData)
+  holidayChartData.value = createChartData(holidayDatesWithData, holidayDailyActivityDurations)
+  weekdayChartData.value = createChartData(weekdayDatesWithData, weekdayDailyActivityDurations)
 }
 
 const loadHolidayMapFromLocalStorage = () => {
