@@ -121,8 +121,8 @@ const timeSlots: TimeSlot[] = [
 ]
 
 onMounted(() => {
-  loadFromLocalStorage()
   loadHolidayMapFromLocalStorage()
+  loadFromLocalStorage()
 })
 
 const formattedDate = computed(() => {

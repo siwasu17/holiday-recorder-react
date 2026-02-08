@@ -1,12 +1,18 @@
 <template>
   <div class="stats-container">
-    <h2>活動記録グラフ</h2>
+    <h3>活動記録グラフ</h3>
 
     <div v-if="hasData">
-      <div class="chart-section">
-        <h3>過去の活動</h3>
+      <div v-if="hasHolidayData" class="chart-section">
+        <h4>過去の活動(休日)</h4>
         <div class="chart-wrapper">
-          <Bar :data="chartData" :options="chartOptions" />
+          <Bar :data="holidayChartData" :options="chartOptions" />
+        </div>
+      </div>
+      <div v-if="hasWeekdayData" class="chart-section">
+        <h4>過去の活動(平日)</h4>
+        <div class="chart-wrapper">
+          <Bar :data="weekdayChartData" :options="chartOptions" />
         </div>
       </div>
     </div>
@@ -42,7 +48,9 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 const MINUTES_PER_ACTIVITY = 30
 const aDayOfMillsec = 24 * 60 * 60 * 1000
 
-const chartData = ref<{
+const userDefinedHolidayMap = ref<Record<string, boolean>>({})
+
+const holidayChartData = ref<{
   labels: string[]
   datasets: any[]
 }>({
@@ -50,7 +58,17 @@ const chartData = ref<{
   datasets: [],
 })
 
-const hasData = computed(() => chartData.value.datasets.some((d) => d.data.some((v: number) => v > 0)))
+const weekdayChartData = ref<{
+  labels: string[]
+  datasets: any[]
+}>({
+  labels: [],
+  datasets: [],
+})
+
+const hasHolidayData = computed(() => holidayChartData.value.datasets.some((d) => d.data.some((v: number) => v > 0)))
+const hasWeekdayData = computed(() => weekdayChartData.value.datasets.some((d) => d.data.some((v: number) => v > 0)))
+const hasData = computed(() => hasHolidayData.value || hasWeekdayData.value)
 
 const chartOptions = {
   responsive: true,
@@ -91,11 +109,55 @@ const chartOptions = {
 
 const getDateKey = (date: Date) => date.toISOString().split('T')[0] ?? ''
 
+const isHoliday = (date: Date) => {
+  const dateKey = getDateKey(date)
+  if (userDefinedHolidayMap.value[dateKey]) {
+    return true
+  }
+  const dayOfWeek = date.getDay()
+  return dayOfWeek === 0 || dayOfWeek === 6
+}
+
+const createChartData = (
+  datesWithData: Date[],
+  dailyData: { [dateKey: string]: { [categoryKey: string]: number } },
+) => {
+  const today = new Date()
+  const sortedDates = [...datesWithData].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
+
+  const labels = [...sortedDates].reverse().map((date) => {
+    const dateKey = getDateKey(date)
+    const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
+    return dateKey === getDateKey(today) ? `${label}(本日)` : label
+  })
+
+  const datasets = categories
+    .map((category) => {
+      const data = sortedDates
+        .map((date) => {
+          const dateData = dailyData[getDateKey(date)]
+          return dateData ? (dateData[category.key] || 0) * (MINUTES_PER_ACTIVITY / 60) : 0
+        })
+        .reverse()
+
+      return {
+        label: category.label,
+        backgroundColor: category.color,
+        data: data,
+        stack: 'activities',
+      }
+    })
+    .filter((dataset) => dataset.data.some((d) => d > 0))
+
+  return { labels, datasets }
+}
+
 const loadActivities = () => {
   const today = new Date()
-  const labels: string[] = []
-  const dailyData: { [dateKey: string]: { [categoryKey: string]: number } } = {}
-  const datesWithData: Date[] = []
+  const holidayDailyData: { [dateKey: string]: { [categoryKey: string]: number } } = {}
+  const weekdayDailyData: { [dateKey: string]: { [categoryKey: string]: number } } = {}
+  const holidayDatesWithData: Date[] = []
+  const weekdayDatesWithData: Date[] = []
 
   // 直近30日分くらいを探索対象とする
   for (let i = 0; i < 30; i++) {
@@ -108,51 +170,32 @@ const loadActivities = () => {
       const dataObj = JSON.parse(saved)
       const activities = Object.values(dataObj).flat() as Activity[]
       if (activities.length > 0) {
-        datesWithData.push(date)
-        dailyData[dateKey] = {}
+        const targetDailyData = isHoliday(date) ? holidayDailyData : weekdayDailyData
+        const targetDatesWithData = isHoliday(date) ? holidayDatesWithData : weekdayDatesWithData
+
+        targetDatesWithData.push(date)
+        targetDailyData[dateKey] = {}
         for (const activity of activities) {
           const categoryKey = activity.categoryKey
-          dailyData[dateKey][categoryKey] = (dailyData[dateKey][categoryKey] || 0) + 1
+          targetDailyData[dateKey][categoryKey] = (targetDailyData[dateKey][categoryKey] || 0) + 1
         }
       }
     }
   }
 
-  // 日付順にソートして最新8件に絞る
-  const sortedDates = datesWithData.sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
+  holidayChartData.value = createChartData(holidayDatesWithData, holidayDailyData)
+  weekdayChartData.value = createChartData(weekdayDatesWithData, weekdayDailyData)
+}
 
-  for (const date of sortedDates.reverse()) {
-    const dateKey = getDateKey(date)
-    const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
-    labels.push(dateKey === getDateKey(today) ? `${label}(本日)` : label)
-  }
-
-  const datasets = categories
-    .map((category) => {
-      const data = sortedDates.map((date) => {
-        const data = dailyData[getDateKey(date)]
-        if (data) {
-          return (data[category.key] || 0) * (MINUTES_PER_ACTIVITY / 60)
-        } else {
-          return 0
-        }
-      })
-      return {
-        label: category.label,
-        backgroundColor: category.color,
-        data: data,
-        stack: 'activities',
-      }
-    })
-    .filter((dataset) => dataset.data.some((d) => d > 0))
-
-  chartData.value = {
-    labels: labels,
-    datasets: datasets,
+const loadHolidayMapFromLocalStorage = () => {
+  const saved = localStorage.getItem('userDefinedHolidayMap')
+  if (saved) {
+    userDefinedHolidayMap.value = JSON.parse(saved)
   }
 }
 
 onMounted(() => {
+  loadHolidayMapFromLocalStorage()
   loadActivities()
 })
 </script>
