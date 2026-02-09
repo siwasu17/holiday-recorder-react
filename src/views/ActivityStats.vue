@@ -106,7 +106,14 @@ const chartOptions = {
   },
 }
 
-const getDateKey = (date: Date) => date.toISOString().split('T')[0] ?? ''
+const getDateKey = (date: Date) => {
+  return new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
 
 const isHoliday = (date: Date) => {
   const dateKey = getDateKey(date)
