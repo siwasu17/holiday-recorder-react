@@ -64,6 +64,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, shallowReactive, onMounted } from 'vue'
+import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 import type { TimeSlot, Category, Activity } from '@/types'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar.vue'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter.vue'
@@ -135,17 +136,7 @@ const formattedDate = computed(() => {
 })
 
 const isHoliday = computed(() => {
-  const dateKey = getDateKey(currentDate.value)
-
-  // 明示的に休日/平日が記録されているものはそれに従う
-  const userDefinedHoliday = userDefinedHolidayMap.value[dateKey]
-  if (userDefinedHoliday !== undefined) {
-    return userDefinedHoliday
-  }
-
-  // 土日は休日扱い
-  const dayOfWeek = currentDate.value.getDay()
-  return dayOfWeek === 0 || dayOfWeek === 6
+  return isHolidayUtil(currentDate.value, userDefinedHolidayMap.value)
 })
 
 const isSlotSelected = computed(() => (slotStart: string) => {
@@ -300,16 +291,6 @@ const deleteActivity = () => {
   })
 }
 
-const getDateKey = (date: Date) => {
-  // sv-SEはスウェーデン形式だがYYYY-MM-DDにできる
-  // タイムゾーンは日本にする
-  return new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date)
-}
 
 const saveToLocalStorage = () => {
   const key = `activities-${getDateKey(currentDate.value)}`

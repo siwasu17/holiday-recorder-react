@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 import { Bar } from 'vue-chartjs'
 import type { Activity, Category } from '@/types'
@@ -106,22 +107,9 @@ const chartOptions = {
   },
 }
 
-const getDateKey = (date: Date) => {
-  return new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date)
-}
 
 const isHoliday = (date: Date) => {
-  const dateKey = getDateKey(date)
-  if (userDefinedHolidayMap.value[dateKey]) {
-    return true
-  }
-  const dayOfWeek = date.getDay()
-  return dayOfWeek === 0 || dayOfWeek === 6
+  return isHolidayUtil(date, userDefinedHolidayMap.value)
 }
 
 const createChartData = (
