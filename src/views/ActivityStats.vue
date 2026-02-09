@@ -132,11 +132,10 @@ const createChartData = (
   const sortedDates = [...datesWithData].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
 
   const labels = [...sortedDates].reverse().map((date) => {
-    const dateKey = getDateKey(date)
+    const dayOfWeek = date.toLocaleDateString('ja-JP', { weekday: 'short' }).slice(0, 1) // Extract single kanji for day of week
     const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
-    return dateKey === getDateKey(today) ? `${label}(本日)` : label
+    return `${label}(${dayOfWeek})`
   })
-
   const datasets = categories
     // nopは除外
     .filter((category) => category.key !== 'nop')
