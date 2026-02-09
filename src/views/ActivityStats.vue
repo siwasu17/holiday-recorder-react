@@ -128,7 +128,6 @@ const createChartData = (
   datesWithData: Date[],
   dailyActivityDurations: { [dateKey: string]: { [categoryKey: string]: number } },
 ) => {
-  const today = new Date()
   const sortedDates = [...datesWithData].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
 
   const labels = [...sortedDates].reverse().map((date) => {
