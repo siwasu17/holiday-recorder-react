@@ -107,7 +107,6 @@ const chartOptions = {
   },
 }
 
-
 const isHoliday = (date: Date) => {
   return isHolidayUtil(date, userDefinedHolidayMap.value)
 }

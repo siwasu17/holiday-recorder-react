@@ -291,7 +291,6 @@ const deleteActivity = () => {
   })
 }
 
-
 const saveToLocalStorage = () => {
   const key = `activities-${getDateKey(currentDate.value)}`
   localStorage.setItem(key, JSON.stringify(Object.fromEntries(activities)))
