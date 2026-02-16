@@ -6,7 +6,7 @@
     </div>
     <div class="category-grid">
       <button
-        v-for="category in categories"
+        v-for="category in CATEGORIES"
         :key="category.key"
         class="mini-category-button"
         :style="{ backgroundColor: category.color }"
@@ -19,10 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Category } from '@/types'
+import { CATEGORIES } from '@/constants'
 
 defineProps<{
-  categories: Category[]
   canUndo: boolean
   canRedo: boolean
 }>()

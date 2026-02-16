@@ -11,7 +11,7 @@
     <main class="main-content-scrollable">
       <div class="timetable" role="table">
         <div
-          v-for="slot in timeSlots"
+          v-for="slot in TIME_SLOTS"
           :key="slot.start"
           @click="selectTimeSlot(slot.start)"
           :class="['time-row', { 'is-selected': isSlotSelected(slot.start) }]"
@@ -41,7 +41,6 @@
 
     <ActivityEditModal
       :show="isModalOpen"
-      :categories="categories"
       :activity="editingActivity"
       :slot-label="editingSlotKey"
       :slot-index="editingSlotIndex"
@@ -52,7 +51,6 @@
     />
 
     <TimeTrackerActionFooter
-      :categories="categories"
       :can-undo="canUndo"
       :can-redo="canRedo"
       @select-category="selectCategory"
@@ -64,14 +62,15 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, shallowReactive, onMounted } from 'vue'
-import type { TimeSlot, Category, Activity } from '@/types'
+import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
+import type { Activity } from '@/types'
+import { CATEGORIES, TIME_SLOTS, MAX_ACTIVITIES_PER_SLOT, LOCAL_STORAGE_ACTIVITY_PREFIX, LOCAL_STORAGE_HOLIDAY_MAP_KEY } from '@/constants'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar.vue'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter.vue'
 import ActivityEditModal from '@/components/ActivityEditModal.vue'
 
 const currentDate = ref(new Date())
 const currentTimeSlot = ref<string | null>(null)
-const MAX_ACTIVITIES_PER_SLOT = 4
 
 type ActivityMap = Map<string, Activity[]>
 
@@ -93,33 +92,6 @@ const editingActivity = computed(() => {
 // '2026-01-10': false,
 const userDefinedHolidayMap = ref<Record<string, boolean>>({})
 
-const categories: Category[] = [
-  { key: 'meal', label: '食事', color: '#FFE5D9' },
-  { key: 'rest', label: '休息', color: '#D6EFFF' },
-  { key: 'exercise', label: '運動', color: '#E2F0CB' },
-  { key: 'plan', label: '検討', color: '#E8DFF5' },
-  { key: 'dev_in', label: '開発(In)', color: '#B9F2FF' },
-  { key: 'dev_out', label: '開発(Out)', color: '#89CFF0' },
-  { key: 'culture', label: '文化', color: '#FCE1E4' },
-  { key: 'event', label: '行事', color: '#F3C4FB' },
-  { key: 'housework', label: '家事(定)', color: '#FFF9C4' },
-  { key: 'task', label: '家事(単)', color: '#FFD3D3' },
-  { key: 'etc', label: 'その他', color: '#F0F4EF' },
-  { key: 'nop', label: '余白', color: '#E0E0E0' },
-]
-
-const timeSlots: TimeSlot[] = [
-  { start: '08:00', label: '8 - 10' },
-  { start: '10:00', label: '10 - 12' },
-  { start: '12:00', label: '12 - 14' },
-  { start: '14:00', label: '14 - 16' },
-  { start: '16:00', label: '16 - 18' },
-  { start: '18:00', label: '18 - 20' },
-  { start: '20:00', label: '20 - 22' },
-  { start: '22:00', label: '22 - 24' },
-  { start: '00:00+', label: '24 - 26' },
-]
-
 onMounted(() => {
   loadHolidayMapFromLocalStorage()
   loadFromLocalStorage()
@@ -135,17 +107,7 @@ const formattedDate = computed(() => {
 })
 
 const isHoliday = computed(() => {
-  const dateKey = getDateKey(currentDate.value)
-
-  // 明示的に休日/平日が記録されているものはそれに従う
-  const userDefinedHoliday = userDefinedHolidayMap.value[dateKey]
-  if (userDefinedHoliday !== undefined) {
-    return userDefinedHoliday
-  }
-
-  // 土日は休日扱い
-  const dayOfWeek = currentDate.value.getDay()
-  return dayOfWeek === 0 || dayOfWeek === 6
+  return isHolidayUtil(currentDate.value, userDefinedHolidayMap.value)
 })
 
 const isSlotSelected = computed(() => (slotStart: string) => {
@@ -165,11 +127,11 @@ const createActivity = (categoryKey: string): Activity => {
 }
 
 const getActLabel = (categoryKey: string) => {
-  return categories.find((c) => c.key == categoryKey)?.label ?? '不明'
+  return CATEGORIES.find((c) => c.key == categoryKey)?.label ?? '不明'
 }
 
 const getActColor = (categoryKey: string) => {
-  return categories.find((c) => c.key == categoryKey)?.color ?? '#000000'
+  return CATEGORIES.find((c) => c.key == categoryKey)?.color ?? '#000000'
 }
 
 const changeDay = (days: number) => {
@@ -224,9 +186,9 @@ const saveHistory = () => {
 }
 
 const moveToNextSlot = () => {
-  const currentIndex = timeSlots.findIndex((slot) => slot.start === currentTimeSlot.value)
+  const currentIndex = TIME_SLOTS.findIndex((slot) => slot.start === currentTimeSlot.value)
   const nextIndex = currentIndex + 1
-  currentTimeSlot.value = nextIndex >= timeSlots.length ? null : (timeSlots[nextIndex]?.start ?? null)
+  currentTimeSlot.value = nextIndex >= TIME_SLOTS.length ? null : (TIME_SLOTS[nextIndex]?.start ?? null)
 }
 
 const undoAct = () => {
@@ -300,35 +262,24 @@ const deleteActivity = () => {
   })
 }
 
-const getDateKey = (date: Date) => {
-  // sv-SEはスウェーデン形式だがYYYY-MM-DDにできる
-  // タイムゾーンは日本にする
-  return new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date)
-}
-
 const saveToLocalStorage = () => {
-  const key = `activities-${getDateKey(currentDate.value)}`
+  const key = `${LOCAL_STORAGE_ACTIVITY_PREFIX}${getDateKey(currentDate.value)}`
   localStorage.setItem(key, JSON.stringify(Object.fromEntries(activities)))
 }
 
 const saveHolidayMapToLocalStorage = () => {
-  localStorage.setItem('userDefinedHolidayMap', JSON.stringify(userDefinedHolidayMap.value))
+  localStorage.setItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY, JSON.stringify(userDefinedHolidayMap.value))
 }
 
 const loadHolidayMapFromLocalStorage = () => {
-  const saved = localStorage.getItem('userDefinedHolidayMap')
+  const saved = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
   if (saved) {
     userDefinedHolidayMap.value = JSON.parse(saved)
   }
 }
 
 const loadFromLocalStorage = () => {
-  const key = `activities-${getDateKey(currentDate.value)}`
+  const key = `${LOCAL_STORAGE_ACTIVITY_PREFIX}${getDateKey(currentDate.value)}`
   const saved = localStorage.getItem(key)
   activities.clear()
   if (saved) {

@@ -11,7 +11,7 @@
         <p>別のカテゴリに変更：</p>
         <div class="category-grid">
           <button
-            v-for="category in categories"
+            v-for="category in CATEGORIES"
             :key="category.key"
             class="mini-category-button"
             :style="{ backgroundColor: category.color }"
@@ -35,12 +35,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Activity, Category } from '@/types'
+import type { Activity } from '@/types'
 import { computed, ref, watch } from 'vue'
+import { CATEGORIES } from '@/constants'
 
 const props = defineProps<{
   show: boolean
-  categories: Category[]
   slotLabel: string | null
   slotIndex: number
   activity: Activity | null
@@ -59,7 +59,7 @@ watch(
 )
 
 const categoryLabel = computed(() => {
-  return props.categories.find((c) => c.key == props.activity?.categoryKey)?.label ?? '不明'
+  return CATEGORIES.find((c) => c.key == props.activity?.categoryKey)?.label ?? '不明'
 })
 </script>
 
