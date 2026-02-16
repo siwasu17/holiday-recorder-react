@@ -27,26 +27,10 @@ import { ref, onMounted, computed } from 'vue'
 import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 import { Bar } from 'vue-chartjs'
-import type { Activity, Category } from '@/types'
-
-const categories: Category[] = [
-  { key: 'meal', label: '食事', color: '#FFE5D9' },
-  { key: 'rest', label: '休息', color: '#D6EFFF' },
-  { key: 'exercise', label: '運動', color: '#E2F0CB' },
-  { key: 'plan', label: '検討', color: '#E8DFF5' },
-  { key: 'dev_in', label: '開発(In)', color: '#B9F2FF' },
-  { key: 'dev_out', label: '開発(Out)', color: '#89CFF0' },
-  { key: 'culture', label: '文化', color: '#FCE1E4' },
-  { key: 'event', label: '行事', color: '#F3C4FB' },
-  { key: 'housework', label: '家事(定)', color: '#FFF9C4' },
-  { key: 'task', label: '家事(単)', color: '#FFD3D3' },
-  { key: 'etc', label: 'その他', color: '#F0F4EF' },
-  { key: 'nop', label: '余白', color: '#E0E0E0' },
-]
+import type { Activity } from '@/types'
+import { CATEGORIES, A_DAY_IN_MILLISECONDS, LOCAL_STORAGE_ACTIVITY_PREFIX, LOCAL_STORAGE_HOLIDAY_MAP_KEY } from '@/constants'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
-
-const aDayOfMillsec = 24 * 60 * 60 * 1000
 
 const userDefinedHolidayMap = ref<Record<string, boolean>>({})
 
@@ -122,7 +106,7 @@ const createChartData = (
     const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
     return `${label}(${dayOfWeek})`
   })
-  const datasets = categories
+  const datasets = CATEGORIES
     // nopは除外
     .filter((category) => category.key !== 'nop')
     .map((category) => {
@@ -155,9 +139,9 @@ const loadActivities = () => {
 
   // 直近30日分くらいを探索対象とする
   for (let i = 0; i < 30; i++) {
-    const date = new Date(today.getTime() - i * aDayOfMillsec)
+    const date = new Date(today.getTime() - i * A_DAY_IN_MILLISECONDS)
     const dateKey = getDateKey(date)
-    const storageKey = `activities-${dateKey}`
+    const storageKey = `${LOCAL_STORAGE_ACTIVITY_PREFIX}${dateKey}`
     const saved = localStorage.getItem(storageKey)
 
     if (saved) {
@@ -198,7 +182,7 @@ const loadActivities = () => {
 }
 
 const loadHolidayMapFromLocalStorage = () => {
-  const saved = localStorage.getItem('userDefinedHolidayMap')
+  const saved = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
   if (saved) {
     userDefinedHolidayMap.value = JSON.parse(saved)
   }
