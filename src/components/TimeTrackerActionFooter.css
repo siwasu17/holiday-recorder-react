@@ -1,35 +1,3 @@
-<template>
-  <div class="tracker-action-footer">
-    <div class="history-controls-inline">
-      <button @click="$emit('undo')" :disabled="!canUndo" class="history-mini-button">↩ Undo</button>
-      <button @click="$emit('redo')" :disabled="!canRedo" class="history-mini-button">Redo ↪</button>
-    </div>
-    <div class="category-grid">
-      <button
-        v-for="category in CATEGORIES"
-        :key="category.key"
-        class="mini-category-button"
-        :style="{ backgroundColor: category.color }"
-        @click="$emit('select-category', category.key)"
-      >
-        {{ category.label }}
-      </button>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { CATEGORIES } from '@/constants'
-
-defineProps<{
-  canUndo: boolean
-  canRedo: boolean
-}>()
-
-defineEmits(['select-category', 'undo', 'redo'])
-</script>
-
-<style scoped>
 .tracker-action-footer {
   position: fixed;
   left: 0;
@@ -84,4 +52,3 @@ defineEmits(['select-category', 'undo', 'redo'])
   font-size: 0.8rem;
   cursor: pointer;
 }
-</style>
