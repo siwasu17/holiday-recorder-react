@@ -1,0 +1,43 @@
+.app-header {
+  background: var(--surface-color);
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--app-header-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.app-nav button {
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background: none;
+  font-size: 0.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-sub);
+}
+
+.app-nav button.active {
+  background-color: var(--accent-soft);
+  border-color: var(--border-color);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.app-main {
+  /* add any specific main content styling if needed */
+}
