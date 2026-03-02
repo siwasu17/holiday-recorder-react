@@ -1,6 +1,5 @@
 import React from 'react'
 import { CATEGORIES } from '@/constants'
-import './TimeTrackerActionFooter.css'
 
 interface Props {
   canUndo: boolean
@@ -18,28 +17,28 @@ const TimeTrackerActionFooter: React.FC<Props> = ({
   onRedo,
 }) => {
   return (
-    <div className="tracker-action-footer">
-      <div className="history-controls-inline">
+    <div className="fixed left-0 right-0 bottom-0 bg-surface p-[10px] shadow-[0_-2px_4px_rgba(0,0,0,0.1)] z-10">
+      <div className="flex justify-center gap-[100px] mb-[4px]">
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className="history-mini-button"
+          className="bg-none border border-[#ddd] rounded-[15px] px-[12px] py-[2px] text-[0.8rem] text-[#666] cursor-pointer transition-all duration-200 disabled:text-[#ccc] disabled:border-[#eee] disabled:cursor-not-allowed enabled:hover:bg-[#f9f9f9] enabled:hover:border-[#bbb]"
         >
           ↩ Undo
         </button>
         <button
           onClick={onRedo}
           disabled={!canRedo}
-          className="history-mini-button"
+          className="bg-none border border-[#ddd] rounded-[15px] px-[12px] py-[2px] text-[0.8rem] text-[#666] cursor-pointer transition-all duration-200 disabled:text-[#ccc] disabled:border-[#eee] disabled:cursor-not-allowed enabled:hover:bg-[#f9f9f9] enabled:hover:border-[#bbb]"
         >
           Redo ↪
         </button>
       </div>
-      <div className="category-grid">
+      <div className="grid grid-cols-3 gap-[8px] mt-[10px]">
         {CATEGORIES.map((category) => (
           <button
             key={category.key}
-            className="mini-category-button"
+            className="px-[4px] py-[8px] border-none rounded-[4px] text-[0.8rem] cursor-pointer"
             style={{ backgroundColor: category.color }}
             onClick={() => onSelectCategory(category.key)}
           >

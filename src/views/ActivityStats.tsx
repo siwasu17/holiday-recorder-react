@@ -17,7 +17,6 @@ import {
   LOCAL_STORAGE_HOLIDAY_MAP_KEY,
 } from '@/constants'
 import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
-import './ActivityStats.css'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
@@ -227,23 +226,23 @@ const ActivityStats: React.FC = () => {
   }, [isHoliday, createChartData])
 
   return (
-    <div className="stats-container">
-      <h3>活動記録グラフ</h3>
+    <div className="p-[20px]">
+      <h3 className="text-lg font-bold mb-4">活動記録グラフ</h3>
 
       {hasData ? (
         <div>
           {hasHolidayData && (
-            <div className="chart-section">
-              <h4>過去の活動(休日)</h4>
-              <div className="chart-wrapper">
+            <div className="mt-[20px]">
+              <h4 className="font-semibold mb-2">過去の活動(休日)</h4>
+              <div className="relative w-full max-w-[800px] h-[500px] mx-auto">
                 <Bar data={holidayChartData} options={chartOptions} />
               </div>
             </div>
           )}
           {hasWeekdayData && (
-            <div className="chart-section">
-              <h4>過去の活動(平日)</h4>
-              <div className="chart-wrapper">
+            <div className="mt-[20px]">
+              <h4 className="font-semibold mb-2">過去の活動(平日)</h4>
+              <div className="relative w-full max-w-[800px] h-[500px] mx-auto">
                 <Bar data={weekdayChartData} options={chartOptions} />
               </div>
             </div>

@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import TimeTracker from './views/TimeTracker'
 import ActivityStats from './views/ActivityStats'
 import './index.css'
-import './App.css'
 
 type ViewName = 'TimeTracker' | 'ActivityStats'
 
@@ -20,19 +19,28 @@ const App: React.FC = () => {
     }
   }
 
+  const getButtonClass = (viewName: ViewName) => {
+    const isActive = currentView === viewName
+    const base = 'px-[16px] py-[8px] border rounded-[20px] bg-none text-[0.6rem] font-medium cursor-pointer transition-all duration-300'
+    const activeClass = 'bg-accent-soft border-border-main text-text-main font-semibold'
+    const inactiveClass = 'border-transparent text-text-sub hover:text-text-main'
+
+    return `${base} ${isActive ? activeClass : inactiveClass}`
+  }
+
   return (
     <div id="app-shell">
-      <header className="app-header">
-        <nav className="app-nav">
+      <header className="bg-surface p-[10px] border-b border-border-main shadow-[0_2px_4px_rgba(0,0,0,0.05)] sticky top-0 z-20 h-header box-border flex items-center justify-center">
+        <nav className="flex justify-center gap-[10px]">
           <button
             onClick={() => setCurrentView('TimeTracker')}
-            className={currentView === 'TimeTracker' ? 'active' : ''}
+            className={getButtonClass('TimeTracker')}
           >
             トラッカー
           </button>
           <button
             onClick={() => setCurrentView('ActivityStats')}
-            className={currentView === 'ActivityStats' ? 'active' : ''}
+            className={getButtonClass('ActivityStats')}
           >
             統計
           </button>

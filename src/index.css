@@ -1,11 +1,13 @@
-:root {
-  --bg-color: #fcfaf2;
-  --surface-color: #fdfcf8;
-  --text-main: #4a4945;
-  --text-sub: #8c8b85;
-  --border-color: #e8e6df;
-  --accent-soft: #f0f3f5;
-  --app-header-height: 52px;
+@import "tailwindcss";
+
+@theme {
+  --color-bg-main: #fcfaf2;
+  --color-surface: #fdfcf8;
+  --color-text-main: #4a4945;
+  --color-text-sub: #8c8b85;
+  --color-border-main: #e8e6df;
+  --color-accent-soft: #f0f3f5;
+  --spacing-header: 52px;
 }
 
 body {
@@ -16,6 +18,6 @@ body {
 }
 
 #root {
-  color: var(--text-main);
-  background-color: var(--bg-color);
+  color: var(--color-text-main);
+  background-color: var(--color-bg-main);
 }
