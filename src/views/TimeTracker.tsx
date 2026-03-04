@@ -212,7 +212,7 @@ const TimeTracker: React.FC = () => {
   }
 
   return (
-    <div className="h-[calc(100dvh-theme(spacing.header))] flex flex-col">
+    <div className="h-[calc(100dvh-(var(--spacing-header)))] flex flex-col">
       <TimeTrackerToolbar
         formattedDate={formattedDate}
         isHoliday={isHoliday}
@@ -221,27 +221,27 @@ const TimeTracker: React.FC = () => {
         onToggleHoliday={saveUserDefinedHoliday}
       />
 
-      <main className="flex-1 overflow-y-auto pb-[230px]">
+      <main className="flex-1 overflow-y-auto pb-57.5">
         <div className="border-border-main flex w-full flex-col border-t" role="table">
           {TIME_SLOTS.map((slot) => (
             <div
               key={slot.start}
               onClick={() => selectTimeSlot(slot.start)}
-              className={`border-border-main grid min-h-[60px] cursor-pointer grid-cols-[80px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${currentTimeSlot === slot.start ? 'bg-accent-soft' : ''}`}
+              className={`border-border-main grid min-h-15 cursor-pointer grid-cols-[80px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${currentTimeSlot === slot.start ? 'bg-accent-soft' : ''}`}
               role="row"
             >
               <div
-                className="text-text-sub flex items-center justify-center bg-[#f1efea] p-[4px] text-[0.8rem] font-bold"
+                className="text-text-sub flex items-center justify-center bg-[#f1efea] p-1 text-[0.8rem] font-bold"
                 role="cell"
               >
                 {slot.label}
               </div>
 
-              <div className="flex flex-col gap-[2px] p-[4px]" role="cell">
+              <div className="flex flex-col gap-0.5 p-1" role="cell">
                 {(activities[slot.start] ?? []).map((activity, index) => (
                   <div
                     key={index}
-                    className="box-border flex w-full flex-grow flex-col items-center justify-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.2] text-ellipsis whitespace-nowrap"
+                    className="box-border flex w-full grow flex-col items-center justify-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.2] text-ellipsis whitespace-nowrap"
                     style={{ backgroundColor: getActColor(activity.categoryKey) }}
                     onClick={(e) => {
                       e.stopPropagation()
@@ -250,7 +250,7 @@ const TimeTracker: React.FC = () => {
                   >
                     <span className="activity-label">{getActLabel(activity.categoryKey)}</span>
                     {activity.memo && (
-                      <div className="mt-[2px] max-w-full overflow-hidden rounded-[3px] bg-white p-[1px_4px] text-[0.8em] text-ellipsis whitespace-nowrap text-[#333]">
+                      <div className="mt-0.5 max-w-full overflow-hidden rounded-[3px] bg-white p-[1px_4px] text-[0.8em] text-ellipsis whitespace-nowrap text-[#333]">
                         {activity.memo}
                       </div>
                     )}

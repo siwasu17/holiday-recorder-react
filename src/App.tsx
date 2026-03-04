@@ -31,8 +31,8 @@ const App: React.FC = () => {
 
   return (
     <div id="app-shell">
-      <header className="bg-surface border-border-main h-header sticky top-0 z-20 box-border flex items-center justify-center border-b p-[10px] shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
-        <nav className="flex justify-center gap-[10px]">
+      <header className="bg-surface border-border-main h-header sticky top-0 z-20 box-border flex items-center justify-center border-b p-2.5 shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+        <nav className="flex justify-center gap-2.5">
           <button onClick={() => setCurrentView('TimeTracker')} className={getButtonClass('TimeTracker')}>
             トラッカー
           </button>

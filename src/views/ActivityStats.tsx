@@ -204,23 +204,23 @@ const ActivityStats: React.FC = () => {
   }, [isHoliday, createChartData])
 
   return (
-    <div className="p-[20px]">
+    <div className="p-5">
       <h3 className="mb-4 text-lg font-bold">活動記録グラフ</h3>
 
       {hasData ? (
         <div>
           {hasHolidayData && (
-            <div className="mt-[20px]">
+            <div className="mt-5">
               <h4 className="mb-2 font-semibold">過去の活動(休日)</h4>
-              <div className="relative mx-auto h-[500px] w-full max-w-[800px]">
+              <div className="relative mx-auto h-125 w-full max-w-200">
                 <Bar data={holidayChartData} options={chartOptions} />
               </div>
             </div>
           )}
           {hasWeekdayData && (
-            <div className="mt-[20px]">
+            <div className="mt-5">
               <h4 className="mb-2 font-semibold">過去の活動(平日)</h4>
-              <div className="relative mx-auto h-[500px] w-full max-w-[800px]">
+              <div className="relative mx-auto h-125 w-full max-w-200">
                 <Bar data={weekdayChartData} options={chartOptions} />
               </div>
             </div>

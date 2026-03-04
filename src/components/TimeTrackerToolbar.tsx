@@ -17,10 +17,10 @@ const TimeTrackerToolbar: React.FC<Props> = ({
 }) => {
   return (
     <div className="bg-surface top-header sticky z-10 w-full p-0 shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
-      <div className="box-border flex h-[50px] items-center justify-between p-[10px]">
+      <div className="box-border flex h-12.5 items-center justify-between p-2.5">
         <button
           onClick={onPreviousDay}
-          className="border-border-main text-text-main hover:bg-accent-soft flex min-w-[40px] cursor-pointer items-center justify-center rounded-[20px] border bg-transparent px-[16px] py-[6px] text-[0.9rem] font-medium transition-all duration-200 outline-none"
+          className="border-border-main text-text-main hover:bg-accent-soft flex min-w-10 cursor-pointer items-center justify-center rounded-[20px] border bg-transparent px-4 py-1.5 text-[0.9rem] font-medium transition-all duration-200 outline-none"
         >
           &lt; Prev
         </button>
@@ -31,14 +31,14 @@ const TimeTrackerToolbar: React.FC<Props> = ({
               type="checkbox"
               checked={isHoliday}
               onChange={onToggleHoliday}
-              className="mr-[4px] h-[12px] w-[12px]"
+              className="mr-1 h-3 w-3"
             />
             <span>休日</span>
           </label>
         </div>
         <button
           onClick={onNextDay}
-          className="border-border-main text-text-main hover:bg-accent-soft flex min-w-[40px] cursor-pointer items-center justify-center rounded-[20px] border bg-transparent px-[16px] py-[6px] text-[0.9rem] font-medium transition-all duration-200 outline-none"
+          className="border-border-main text-text-main hover:bg-accent-soft flex min-w-10 cursor-pointer items-center justify-center rounded-[20px] border bg-transparent px-4 py-1.5 text-[0.9rem] font-medium transition-all duration-200 outline-none"
         >
           Next &gt;
         </button>

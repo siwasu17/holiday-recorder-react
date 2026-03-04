@@ -39,18 +39,18 @@ const ActivityEditModal: React.FC<Props> = ({
 
   return (
     <div
-      className="fixed top-0 left-0 z-[1000] flex h-full w-full items-center justify-center bg-[rgba(0,0,0,0.6)]"
+      className="fixed top-0 left-0 z-1000 flex h-full w-full items-center justify-center bg-[rgba(0,0,0,0.6)]"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-[90%] max-w-[400px] rounded-[12px] bg-white p-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
-        <div className="mb-[15px] flex items-baseline justify-between gap-[10px]">
+      <div className="w-[90%] max-w-100 rounded-xl bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+        <div className="mb-3.75 flex items-baseline justify-between gap-2.5">
           <div className="text-[1.5rem] text-[#333]">{categoryLabel}</div>
           <span className="text-[0.8rem] text-[#666]">
             {slotLabel} #{slotIndex + 1}
           </span>
           <button
             onClick={onDeleteActivity}
-            className="cursor-pointer rounded-[6px] border-none bg-[#ff4d4f] p-[10px] text-white"
+            className="cursor-pointer rounded-md border-none bg-[#ff4d4f] p-2.5 text-white"
           >
             削除
           </button>
@@ -58,11 +58,11 @@ const ActivityEditModal: React.FC<Props> = ({
 
         <div>
           <p>別のカテゴリに変更：</p>
-          <div className="mt-[10px] grid grid-cols-3 gap-[8px]">
+          <div className="mt-2.5 grid grid-cols-3 gap-2">
             {CATEGORIES.map((category) => (
               <button
                 key={category.key}
-                className="cursor-pointer rounded-[4px] border-none p-[8px_4px] text-[0.8rem]"
+                className="cursor-pointer rounded-sm border-none p-[8px_4px] text-[0.8rem]"
                 style={{ backgroundColor: category.color }}
                 onClick={() => onUpdateActivityCategory(category.key)}
               >
@@ -72,7 +72,7 @@ const ActivityEditModal: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="mt-[20px] flex items-center gap-[10px]">
+        <div className="mt-5 flex items-center gap-2.5">
           <input
             id="memo-input"
             type="text"
@@ -83,7 +83,7 @@ const ActivityEditModal: React.FC<Props> = ({
           />
         </div>
 
-        <div className="mt-[20px] flex flex-col gap-[10px]">
+        <div className="mt-5 flex flex-col gap-2.5">
           <button
             onClick={() => onUpdateActivityMemo(memo)}
             className="cursor-pointer rounded-md border-none bg-[#007bff] p-[8px_15px] whitespace-nowrap text-white transition-colors duration-200 hover:bg-[#0056b3]"
