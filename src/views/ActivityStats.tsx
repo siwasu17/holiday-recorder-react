@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-} from 'chart.js'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import type { Activity } from '@/types'
 import {
@@ -17,14 +9,11 @@ import {
   LOCAL_STORAGE_HOLIDAY_MAP_KEY,
 } from '@/constants'
 import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
-import './ActivityStats.css'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const ActivityStats: React.FC = () => {
-  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<
-    Record<string, boolean>
-  >({})
+  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<Record<string, boolean>>({})
   const [holidayChartData, setHolidayChartData] = useState<{
     labels: string[]
     datasets: {
@@ -70,10 +59,7 @@ const ActivityStats: React.FC = () => {
       },
       tooltip: {
         callbacks: {
-          label: function (context: {
-            dataset: { label?: string }
-            parsed: { y: number | null }
-          }) {
+          label: function (context: { dataset: { label?: string }; parsed: { y: number | null } }) {
             let label = context.dataset.label || ''
             if (label) {
               label += ': '
@@ -114,14 +100,10 @@ const ActivityStats: React.FC = () => {
         [dateKey: string]: { [categoryKey: string]: number }
       },
     ) => {
-      const sortedDates = [...datesWithData]
-        .sort((a, b) => b.getTime() - a.getTime())
-        .slice(0, 8)
+      const sortedDates = [...datesWithData].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
 
       const labels = [...sortedDates].reverse().map((date) => {
-        const dayOfWeek = date
-          .toLocaleDateString('ja-JP', { weekday: 'short' })
-          .slice(0, 1) // Extract single kanji for day of week
+        const dayOfWeek = date.toLocaleDateString('ja-JP', { weekday: 'short' }).slice(0, 1) // Extract single kanji for day of week
         const label = date.toLocaleDateString('ja-JP', {
           month: '2-digit',
           day: '2-digit',
@@ -196,8 +178,7 @@ const ActivityStats: React.FC = () => {
 
               for (const activity of activitiesInSlot) {
                 const categoryKey = activity.categoryKey
-                currentDayDurations[categoryKey] =
-                  (currentDayDurations[categoryKey] || 0) + durationPerActivity
+                currentDayDurations[categoryKey] = (currentDayDurations[categoryKey] || 0) + durationPerActivity
               }
             }
           }
@@ -214,12 +195,8 @@ const ActivityStats: React.FC = () => {
         }
       }
 
-      setHolidayChartData(
-        createChartData(holidayDatesWithData, holidayDailyActivityDurations),
-      )
-      setWeekdayChartData(
-        createChartData(weekdayDatesWithData, weekdayDailyActivityDurations),
-      )
+      setHolidayChartData(createChartData(holidayDatesWithData, holidayDailyActivityDurations))
+      setWeekdayChartData(createChartData(weekdayDatesWithData, weekdayDailyActivityDurations))
     }
 
     loadHolidayMapFromLocalStorage()
@@ -227,23 +204,23 @@ const ActivityStats: React.FC = () => {
   }, [isHoliday, createChartData])
 
   return (
-    <div className="stats-container">
-      <h3>活動記録グラフ</h3>
+    <div className="p-5">
+      <h3 className="mb-4 text-lg font-bold">活動記録グラフ</h3>
 
       {hasData ? (
         <div>
           {hasHolidayData && (
-            <div className="chart-section">
-              <h4>過去の活動(休日)</h4>
-              <div className="chart-wrapper">
+            <div className="mt-5">
+              <h4 className="mb-2 font-semibold">過去の活動(休日)</h4>
+              <div className="relative mx-auto h-125 w-full max-w-200">
                 <Bar data={holidayChartData} options={chartOptions} />
               </div>
             </div>
           )}
           {hasWeekdayData && (
-            <div className="chart-section">
-              <h4>過去の活動(平日)</h4>
-              <div className="chart-wrapper">
+            <div className="mt-5">
+              <h4 className="mb-2 font-semibold">過去の活動(平日)</h4>
+              <div className="relative mx-auto h-125 w-full max-w-200">
                 <Bar data={weekdayChartData} options={chartOptions} />
               </div>
             </div>

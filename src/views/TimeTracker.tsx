@@ -11,7 +11,6 @@ import {
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter'
 import ActivityEditModal from '@/components/ActivityEditModal'
-import './TimeTracker.css'
 
 type ActivityMap = Record<string, Activity[]>
 
@@ -20,9 +19,7 @@ const TimeTracker: React.FC = () => {
   const [prevDate, setPrevDate] = useState(currentDate)
   const [currentTimeSlot, setCurrentTimeSlot] = useState<string | null>(null)
 
-  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<
-    Record<string, boolean>
-  >(() => {
+  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<Record<string, boolean>>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
     return saved ? JSON.parse(saved) : {}
   })
@@ -127,9 +124,7 @@ const TimeTracker: React.FC = () => {
   const moveToNextSlot = (currentSlot: string) => {
     const currentIndex = TIME_SLOTS.findIndex((slot) => slot.start === currentSlot)
     const nextIndex = currentIndex + 1
-    setCurrentTimeSlot(
-      nextIndex >= TIME_SLOTS.length ? null : (TIME_SLOTS[nextIndex]?.start ?? null),
-    )
+    setCurrentTimeSlot(nextIndex >= TIME_SLOTS.length ? null : (TIME_SLOTS[nextIndex]?.start ?? null))
   }
 
   const selectCategory = (categoryKey: string) => {
@@ -217,7 +212,7 @@ const TimeTracker: React.FC = () => {
   }
 
   return (
-    <div className="tracker-container">
+    <div className="h-[calc(100dvh-(var(--spacing-header)))] flex flex-col">
       <TimeTrackerToolbar
         formattedDate={formattedDate}
         isHoliday={isHoliday}
@@ -226,35 +221,38 @@ const TimeTracker: React.FC = () => {
         onToggleHoliday={saveUserDefinedHoliday}
       />
 
-      <main className="main-content-scrollable">
-        <div className="timetable" role="table">
+      <main className="flex-1 overflow-y-auto pb-57.5">
+        <div className="border-border-main flex w-full flex-col border-t" role="table">
           {TIME_SLOTS.map((slot) => (
             <div
               key={slot.start}
               onClick={() => selectTimeSlot(slot.start)}
-              className={`time-row ${currentTimeSlot === slot.start ? 'is-selected' : ''}`}
+              className={`border-border-main grid min-h-15 cursor-pointer grid-cols-[80px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${currentTimeSlot === slot.start ? 'bg-accent-soft' : ''}`}
               role="row"
             >
-              <div className="time-label" role="cell">
+              <div
+                className="text-text-sub flex items-center justify-center bg-[#f1efea] p-1 text-[0.8rem] font-bold"
+                role="cell"
+              >
                 {slot.label}
               </div>
 
-              <div className="activity-cell" role="cell">
+              <div className="flex flex-col gap-0.5 p-1" role="cell">
                 {(activities[slot.start] ?? []).map((activity, index) => (
                   <div
                     key={index}
-                    className="activity-item"
+                    className="box-border flex w-full grow flex-col items-center justify-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.2] text-ellipsis whitespace-nowrap"
                     style={{ backgroundColor: getActColor(activity.categoryKey) }}
                     onClick={(e) => {
                       e.stopPropagation()
                       openEditModal(slot.start, index)
                     }}
                   >
-                    <span className="activity-label">
-                      {getActLabel(activity.categoryKey)}
-                    </span>
+                    <span className="activity-label">{getActLabel(activity.categoryKey)}</span>
                     {activity.memo && (
-                      <div className="memo-label">{activity.memo}</div>
+                      <div className="mt-0.5 max-w-full overflow-hidden rounded-[3px] bg-white p-[1px_4px] text-[0.8em] text-ellipsis whitespace-nowrap text-[#333]">
+                        {activity.memo}
+                      </div>
                     )}
                   </div>
                 ))}
