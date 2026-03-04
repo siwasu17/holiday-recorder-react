@@ -19,9 +19,7 @@ const TimeTracker: React.FC = () => {
   const [prevDate, setPrevDate] = useState(currentDate)
   const [currentTimeSlot, setCurrentTimeSlot] = useState<string | null>(null)
 
-  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<
-    Record<string, boolean>
-  >(() => {
+  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<Record<string, boolean>>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
     return saved ? JSON.parse(saved) : {}
   })
@@ -126,9 +124,7 @@ const TimeTracker: React.FC = () => {
   const moveToNextSlot = (currentSlot: string) => {
     const currentIndex = TIME_SLOTS.findIndex((slot) => slot.start === currentSlot)
     const nextIndex = currentIndex + 1
-    setCurrentTimeSlot(
-      nextIndex >= TIME_SLOTS.length ? null : (TIME_SLOTS[nextIndex]?.start ?? null),
-    )
+    setCurrentTimeSlot(nextIndex >= TIME_SLOTS.length ? null : (TIME_SLOTS[nextIndex]?.start ?? null))
   }
 
   const selectCategory = (categoryKey: string) => {
@@ -216,7 +212,7 @@ const TimeTracker: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-theme(spacing.header))]">
+    <div className="h-[calc(100dvh-theme(spacing.header))] flex flex-col">
       <TimeTrackerToolbar
         formattedDate={formattedDate}
         isHoliday={isHoliday}
@@ -226,34 +222,35 @@ const TimeTracker: React.FC = () => {
       />
 
       <main className="flex-1 overflow-y-auto pb-[230px]">
-        <div className="flex flex-col w-full border-t border-border-main" role="table">
+        <div className="border-border-main flex w-full flex-col border-t" role="table">
           {TIME_SLOTS.map((slot) => (
             <div
               key={slot.start}
               onClick={() => selectTimeSlot(slot.start)}
-              className={`grid grid-cols-[80px_1fr] border-b border-border-main cursor-pointer transition-colors duration-200 min-h-[60px] hover:bg-[#f9f9f9] ${currentTimeSlot === slot.start ? 'bg-accent-soft' : ''}`}
+              className={`border-border-main grid min-h-[60px] cursor-pointer grid-cols-[80px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${currentTimeSlot === slot.start ? 'bg-accent-soft' : ''}`}
               role="row"
             >
-              <div className="p-[4px] text-[0.8rem] font-bold bg-[#f1efea] text-text-sub flex items-center justify-center" role="cell">
+              <div
+                className="text-text-sub flex items-center justify-center bg-[#f1efea] p-[4px] text-[0.8rem] font-bold"
+                role="cell"
+              >
                 {slot.label}
               </div>
 
-              <div className="p-[4px] flex flex-col gap-[2px]" role="cell">
+              <div className="flex flex-col gap-[2px] p-[4px]" role="cell">
                 {(activities[slot.start] ?? []).map((activity, index) => (
                   <div
                     key={index}
-                    className="flex-grow flex flex-col justify-center items-center w-full box-border p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.2] rounded-[3px] whitespace-nowrap overflow-hidden text-ellipsis"
+                    className="box-border flex w-full flex-grow flex-col items-center justify-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.2] text-ellipsis whitespace-nowrap"
                     style={{ backgroundColor: getActColor(activity.categoryKey) }}
                     onClick={(e) => {
                       e.stopPropagation()
                       openEditModal(slot.start, index)
                     }}
                   >
-                    <span className="activity-label">
-                      {getActLabel(activity.categoryKey)}
-                    </span>
+                    <span className="activity-label">{getActLabel(activity.categoryKey)}</span>
                     {activity.memo && (
-                      <div className="bg-white text-[0.8em] p-[1px_4px] rounded-[3px] mt-[2px] text-[#333] max-w-full whitespace-nowrap overflow-hidden text-ellipsis">
+                      <div className="mt-[2px] max-w-full overflow-hidden rounded-[3px] bg-white p-[1px_4px] text-[0.8em] text-ellipsis whitespace-nowrap text-[#333]">
                         {activity.memo}
                       </div>
                     )}

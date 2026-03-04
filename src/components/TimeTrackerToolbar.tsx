@@ -16,29 +16,29 @@ const TimeTrackerToolbar: React.FC<Props> = ({
   onToggleHoliday,
 }) => {
   return (
-    <div className="bg-surface p-0 shadow-[0_2px_4px_rgba(0,0,0,0.05)] sticky top-header z-10 w-full">
-      <div className="flex justify-between items-center p-[10px] h-[50px] box-border">
+    <div className="bg-surface top-header sticky z-10 w-full p-0 shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
+      <div className="box-border flex h-[50px] items-center justify-between p-[10px]">
         <button
           onClick={onPreviousDay}
-          className="bg-transparent border border-border-main text-text-main px-[16px] py-[6px] rounded-[20px] text-[0.9rem] font-medium cursor-pointer transition-all duration-200 outline-none flex items-center justify-center min-w-[40px] hover:bg-accent-soft"
+          className="border-border-main text-text-main hover:bg-accent-soft flex min-w-[40px] cursor-pointer items-center justify-center rounded-[20px] border bg-transparent px-[16px] py-[6px] text-[0.9rem] font-medium transition-all duration-200 outline-none"
         >
           &lt; Prev
         </button>
-        <div className="text-[1.1rem] font-semibold tracking-[0.05em] flex flex-col items-center">
+        <div className="flex flex-col items-center text-[1.1rem] font-semibold tracking-[0.05em]">
           {formattedDate}
-          <label className="flex items-center text-[0.75rem] cursor-pointer select-none font-normal">
+          <label className="flex cursor-pointer items-center text-[0.75rem] font-normal select-none">
             <input
               type="checkbox"
               checked={isHoliday}
               onChange={onToggleHoliday}
-              className="mr-[4px] w-[12px] h-[12px]"
+              className="mr-[4px] h-[12px] w-[12px]"
             />
             <span>休日</span>
           </label>
         </div>
         <button
           onClick={onNextDay}
-          className="bg-transparent border border-border-main text-text-main px-[16px] py-[6px] rounded-[20px] text-[0.9rem] font-medium cursor-pointer transition-all duration-200 outline-none flex items-center justify-center min-w-[40px] hover:bg-accent-soft"
+          className="border-border-main text-text-main hover:bg-accent-soft flex min-w-[40px] cursor-pointer items-center justify-center rounded-[20px] border bg-transparent px-[16px] py-[6px] text-[0.9rem] font-medium transition-all duration-200 outline-none"
         >
           Next &gt;
         </button>
