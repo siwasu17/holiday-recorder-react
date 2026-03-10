@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import type { Activity } from '@/types'
@@ -12,7 +12,7 @@ import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
-const ActivityStats: React.FC = () => {
+const ActivityStats = () => {
   const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<Record<string, boolean>>({})
   const [holidayChartData, setHolidayChartData] = useState<{
     labels: string[]

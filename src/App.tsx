@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import TimeTracker from './views/TimeTracker'
 import ActivityStats from './views/ActivityStats'
 import './index.css'
 
 type ViewName = 'TimeTracker' | 'ActivityStats'
 
-const App: React.FC = () => {
+const App = () => {
   const [currentView, setCurrentView] = useState<ViewName>('TimeTracker')
 
   const renderView = () => {

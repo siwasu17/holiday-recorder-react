@@ -1,4 +1,3 @@
-import React from 'react'
 import { CATEGORIES } from '@/constants'
 
 interface Props {
@@ -9,7 +8,7 @@ interface Props {
   onRedo: () => void
 }
 
-const TimeTrackerActionFooter: React.FC<Props> = ({ canUndo, canRedo, onSelectCategory, onUndo, onRedo }) => {
+const TimeTrackerActionFooter = ({ canUndo, canRedo, onSelectCategory, onUndo, onRedo }: Props) => {
   return (
     <div className="bg-surface fixed right-0 bottom-0 left-0 z-10 p-2.5 shadow-[0_-2px_4px_rgba(0,0,0,0.1)]">
       <div className="mb-1 flex justify-center gap-25">

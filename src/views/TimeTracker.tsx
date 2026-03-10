@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 import type { Activity } from '@/types'
 import {
@@ -14,7 +14,7 @@ import ActivityEditModal from '@/components/ActivityEditModal'
 
 type ActivityMap = Record<string, Activity[]>
 
-const TimeTracker: React.FC = () => {
+const TimeTracker = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [prevDate, setPrevDate] = useState(currentDate)
   const [currentTimeSlot, setCurrentTimeSlot] = useState<string | null>(null)
