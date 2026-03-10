@@ -212,7 +212,7 @@ const TimeTracker = () => {
   }
 
   return (
-    <div className="h-[calc(100dvh-(var(--spacing-header)))] flex flex-col">
+    <div className="flex h-[calc(100dvh-(var(--spacing-header)))] flex-col">
       <TimeTrackerToolbar
         formattedDate={formattedDate}
         isHoliday={isHoliday}
