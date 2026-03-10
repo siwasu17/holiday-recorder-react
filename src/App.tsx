@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import TimeTracker from './views/TimeTracker'
 import ActivityStats from './views/ActivityStats'
 import './index.css'

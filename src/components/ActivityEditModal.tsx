@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import type { Activity } from '@/types'
 import { CATEGORIES } from '@/constants'
 

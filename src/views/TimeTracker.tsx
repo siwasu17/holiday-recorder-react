@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 import type { Activity } from '@/types'
 import {
