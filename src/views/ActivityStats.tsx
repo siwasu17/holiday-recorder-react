@@ -14,7 +14,6 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const ActivityStats = () => {
   const [isLoading, setIsLoading] = useState(true)
-  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<Record<string, boolean>>({})
   const [holidayChartData, setHolidayChartData] = useState<{
     labels: string[]
     datasets: {
@@ -90,13 +89,6 @@ const ActivityStats = () => {
     [],
   )
 
-  const isHoliday = useCallback(
-    (date: Date) => {
-      return isHolidayUtil(date, userDefinedHolidayMap)
-    },
-    [userDefinedHolidayMap],
-  )
-
   const createChartData = useCallback(
     (
       datesWithData: Date[],
@@ -147,7 +139,6 @@ const ActivityStats = () => {
       // 1. 休日マップの読み込み
       const savedHolidayMap = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
       const holidayMap = savedHolidayMap ? JSON.parse(savedHolidayMap) : {}
-      setUserDefinedHolidayMap(holidayMap)
 
       // 2. アクティビティの読み込み
       const today = new Date()
