@@ -53,6 +53,14 @@ const ActivityStats = () => {
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        duration: 400,
+        easing: 'easeOutQuart' as const,
+      },
+      interaction: {
+        mode: 'index' as const,
+        intersect: false,
+      },
       plugins: {
         title: {
           display: true,
@@ -195,10 +203,7 @@ const ActivityStats = () => {
       setHolidayChartData(createChartData(holidayDatesWithData, holidayDailyActivityDurations))
       setWeekdayChartData(createChartData(weekdayDatesWithData, weekdayDailyActivityDurations))
 
-      // わずかな遅延を置いて完了させることで、チラつきを抑える
-      setTimeout(() => {
-        setIsLoading(false)
-      }, 50)
+      setIsLoading(false)
     }
 
     initialize()
