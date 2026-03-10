@@ -5,7 +5,7 @@ import './index.css'
 
 type ViewName = 'TimeTracker' | 'ActivityStats'
 
-const App: React.FC = () => {
+const App = () => {
   const [currentView, setCurrentView] = useState<ViewName>('TimeTracker')
 
   const renderView = () => {

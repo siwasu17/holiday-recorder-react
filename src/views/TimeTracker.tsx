@@ -14,7 +14,7 @@ import ActivityEditModal from '@/components/ActivityEditModal'
 
 type ActivityMap = Record<string, Activity[]>
 
-const TimeTracker: React.FC = () => {
+const TimeTracker = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [prevDate, setPrevDate] = useState(currentDate)
   const [currentTimeSlot, setCurrentTimeSlot] = useState<string | null>(null)

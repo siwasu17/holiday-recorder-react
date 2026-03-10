@@ -8,13 +8,13 @@ interface Props {
   onToggleHoliday: () => void
 }
 
-const TimeTrackerToolbar: React.FC<Props> = ({
+const TimeTrackerToolbar = ({
   formattedDate,
   isHoliday,
   onPreviousDay,
   onNextDay,
   onToggleHoliday,
-}) => {
+}: Props) => {
   return (
     <div className="bg-surface top-header sticky z-10 w-full p-0 shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
       <div className="box-border flex h-12.5 items-center justify-between p-2.5">

@@ -13,7 +13,7 @@ interface Props {
   onDeleteActivity: () => void
 }
 
-const ActivityEditModal: React.FC<Props> = ({
+const ActivityEditModal = ({
   show,
   slotLabel,
   slotIndex,
@@ -22,7 +22,7 @@ const ActivityEditModal: React.FC<Props> = ({
   onUpdateActivityCategory,
   onUpdateActivityMemo,
   onDeleteActivity,
-}) => {
+}: Props) => {
   const [prevActivity, setPrevActivity] = useState(activity)
   const [memo, setMemo] = useState(activity?.memo || '')
 

@@ -12,7 +12,7 @@ import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
-const ActivityStats: React.FC = () => {
+const ActivityStats = () => {
   const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<Record<string, boolean>>({})
   const [holidayChartData, setHolidayChartData] = useState<{
     labels: string[]
