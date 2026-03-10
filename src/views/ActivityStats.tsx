@@ -13,7 +13,7 @@ import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const ActivityStats = () => {
-  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<Record<string, boolean>>({})
+  const [isLoading, setIsLoading] = useState(true)
   const [holidayChartData, setHolidayChartData] = useState<{
     labels: string[]
     datasets: {
@@ -49,48 +49,44 @@ const ActivityStats = () => {
   )
   const hasData = hasHolidayData || hasWeekdayData
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      title: {
-        display: true,
-        text: '日別 活動時間',
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context: { dataset: { label?: string }; parsed: { y: number | null } }) {
-            let label = context.dataset.label || ''
-            if (label) {
-              label += ': '
-            }
-            if (context.parsed.y !== null) {
-              label += `${context.parsed.y.toFixed(1)} 時間`
-            }
-            return label
+  const chartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: '日別 活動時間',
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context: { dataset: { label?: string }; parsed: { y: number | null } }) {
+              let label = context.dataset.label || ''
+              if (label) {
+                label += ': '
+              }
+              if (context.parsed.y !== null) {
+                label += `${context.parsed.y.toFixed(1)} 時間`
+              }
+              return label
+            },
           },
         },
       },
-    },
-    scales: {
-      x: {
-        stacked: true,
-      },
-      y: {
-        stacked: true,
-        title: {
-          display: true,
-          text: '合計時間',
+      scales: {
+        x: {
+          stacked: true,
+        },
+        y: {
+          stacked: true,
+          title: {
+            display: true,
+            text: '合計時間',
+          },
         },
       },
-    },
-  }
-
-  const isHoliday = useCallback(
-    (date: Date) => {
-      return isHolidayUtil(date, userDefinedHolidayMap)
-    },
-    [userDefinedHolidayMap],
+    }),
+    [],
   )
 
   const createChartData = useCallback(
@@ -137,14 +133,14 @@ const ActivityStats = () => {
   )
 
   useEffect(() => {
-    const loadHolidayMapFromLocalStorage = () => {
-      const saved = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
-      if (saved) {
-        setUserDefinedHolidayMap(JSON.parse(saved))
-      }
-    }
+    const initialize = () => {
+      setIsLoading(true)
 
-    const loadActivities = () => {
+      // 1. 休日マップの読み込み
+      const savedHolidayMap = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
+      const holidayMap = savedHolidayMap ? JSON.parse(savedHolidayMap) : {}
+
+      // 2. アクティビティの読み込み
       const today = new Date()
       const holidayDailyActivityDurations: {
         [dateKey: string]: { [categoryKey: string]: number }
@@ -163,7 +159,7 @@ const ActivityStats = () => {
         const saved = localStorage.getItem(storageKey)
 
         if (saved) {
-          const timeSlotsData = JSON.parse(saved) // This will be the object with timeSlot keys
+          const timeSlotsData = JSON.parse(saved)
 
           let totalActivitiesInDay = 0
           const currentDayDurations: { [categoryKey: string]: number } = {}
@@ -174,7 +170,7 @@ const ActivityStats = () => {
 
             if (numActivitiesInSlot > 0) {
               totalActivitiesInDay += numActivitiesInSlot
-              const durationPerActivity = 120 / numActivitiesInSlot // minutes
+              const durationPerActivity = 120 / numActivitiesInSlot
 
               for (const activity of activitiesInSlot) {
                 const categoryKey = activity.categoryKey
@@ -184,7 +180,8 @@ const ActivityStats = () => {
           }
 
           if (totalActivitiesInDay > 0) {
-            if (isHoliday(date)) {
+            // ステートの更新を待たずに、パースしたばかりのマップを直接使う
+            if (isHolidayUtil(date, holidayMap)) {
               holidayDatesWithData.push(date)
               holidayDailyActivityDurations[dateKey] = currentDayDurations
             } else {
@@ -197,11 +194,23 @@ const ActivityStats = () => {
 
       setHolidayChartData(createChartData(holidayDatesWithData, holidayDailyActivityDurations))
       setWeekdayChartData(createChartData(weekdayDatesWithData, weekdayDailyActivityDurations))
+
+      // わずかな遅延を置いて完了させることで、チラつきを抑える
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 50)
     }
 
-    loadHolidayMapFromLocalStorage()
-    loadActivities()
-  }, [isHoliday, createChartData])
+    initialize()
+  }, [createChartData])
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center p-5">
+        <div className="text-gray-500">データを読み込み中...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-5">
