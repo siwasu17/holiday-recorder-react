@@ -54,12 +54,12 @@ const ActivityStats = () => {
       responsive: true,
       maintainAspectRatio: false,
       animation: {
-        duration: 400,
+        duration: 1000,
         easing: 'easeOutQuart' as const,
       },
       interaction: {
-        mode: 'index' as const,
-        intersect: false,
+        mode: 'nearest' as const,
+        intersect: true,
       },
       plugins: {
         title: {
