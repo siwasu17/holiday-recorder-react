@@ -54,7 +54,7 @@ const ActivityStats = () => {
       responsive: true,
       maintainAspectRatio: false,
       animation: {
-        duration: 400,
+        duration: 1000,
         easing: 'easeOutQuart' as const,
       },
       interaction: {
