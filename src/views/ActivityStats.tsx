@@ -58,8 +58,8 @@ const ActivityStats = () => {
         easing: 'easeOutQuart' as const,
       },
       interaction: {
-        mode: 'index' as const,
-        intersect: false,
+        mode: 'nearest' as const,
+        intersect: true,
       },
       plugins: {
         title: {
