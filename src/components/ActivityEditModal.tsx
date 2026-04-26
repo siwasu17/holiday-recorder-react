@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import type { Activity } from '@/types'
 import { CATEGORIES } from '@/constants'
+import CategoryGrid from './CategoryGrid'
 
 interface Props {
   show: boolean
@@ -58,18 +59,7 @@ const ActivityEditModal = ({
 
         <div>
           <p>別のカテゴリに変更：</p>
-          <div className="mt-2.5 grid grid-cols-3 gap-2">
-            {CATEGORIES.map((category) => (
-              <button
-                key={category.key}
-                className="cursor-pointer rounded-sm border-none p-[8px_4px] text-[0.8rem]"
-                style={{ backgroundColor: category.color }}
-                onClick={() => onUpdateActivityCategory(category.key)}
-              >
-                {category.label}
-              </button>
-            ))}
-          </div>
+          <CategoryGrid onSelectCategory={onUpdateActivityCategory} buttonClassName="p-[8px_4px]" />
         </div>
 
         <div className="mt-5 flex items-center gap-2.5">

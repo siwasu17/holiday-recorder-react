@@ -1,212 +1,88 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartData, ChartOptions } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
-import type { Activity } from '@/types'
-import { db } from '@/db'
-import { CATEGORIES, A_DAY_IN_MILLISECONDS } from '@/constants'
-import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
+import { activityService } from '@/services/activityService'
+import { statsService, DailyDurations } from '@/services/statsService'
+import { A_DAY_IN_MILLISECONDS } from '@/constants'
+import { getDateKey } from '@/utils/date'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const ActivityStats = () => {
   const [isLoading, setIsLoading] = useState(true)
-  const [holidayChartData, setHolidayChartData] = useState<{
-    labels: string[]
-    datasets: {
-      label: string
-      backgroundColor: string
-      data: number[]
-      stack: string
-    }[]
-  }>({
+  const [holidayChartData, setHolidayChartData] = useState<ChartData<'bar'>>({
     labels: [],
     datasets: [],
   })
-  const [weekdayChartData, setWeekdayChartData] = useState<{
-    labels: string[]
-    datasets: {
-      label: string
-      backgroundColor: string
-      data: number[]
-      stack: string
-    }[]
-  }>({
+  const [weekdayChartData, setWeekdayChartData] = useState<ChartData<'bar'>>({
     labels: [],
     datasets: [],
   })
 
-  const hasHolidayData = useMemo(
-    () => holidayChartData.datasets.some((d) => d.data.some((v: number) => v > 0)),
-    [holidayChartData],
+  const hasData = useMemo(
+    () =>
+      (holidayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false) ||
+      (weekdayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false),
+    [holidayChartData, weekdayChartData],
   )
-  const hasWeekdayData = useMemo(
-    () => weekdayChartData.datasets.some((d) => d.data.some((v: number) => v > 0)),
-    [weekdayChartData],
-  )
-  const hasData = hasHolidayData || hasWeekdayData
 
-  const chartOptions = useMemo(
+  const chartOptions = useMemo<ChartOptions<'bar'>>(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
-      animation: {
-        duration: 1000,
-        easing: 'easeOutQuart' as const,
-      },
-      interaction: {
-        mode: 'nearest' as const,
-        intersect: true,
-      },
+      animation: { duration: 1000, easing: 'easeOutQuart' as const },
+      interaction: { mode: 'nearest' as const, intersect: true },
       plugins: {
-        title: {
-          display: true,
-          text: '日別 活動時間',
-        },
+        title: { display: true, text: '日別 活動時間' },
         tooltip: {
           callbacks: {
-            label: function (context: { dataset: { label?: string }; parsed: { y: number | null } }) {
+            label: (context) => {
               let label = context.dataset.label || ''
-              if (label) {
-                label += ': '
-              }
-              if (context.parsed.y !== null) {
-                label += `${context.parsed.y.toFixed(1)} 時間`
-              }
+              if (label) label += ': '
+              if (context.parsed.y !== null) label += `${context.parsed.y.toFixed(1)} 時間`
               return label
             },
           },
         },
       },
       scales: {
-        x: {
-          stacked: true,
-        },
-        y: {
-          stacked: true,
-          title: {
-            display: true,
-            text: '合計時間',
-          },
-        },
+        x: { stacked: true },
+        y: { stacked: true, title: { display: true, text: '合計時間' } },
       },
     }),
     [],
   )
 
-  const createChartData = useCallback(
-    (
-      datesWithData: Date[],
-      dailyActivityDurations: {
-        [dateKey: string]: { [categoryKey: string]: number }
-      },
-    ) => {
-      const sortedDates = [...datesWithData].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
-
-      const labels = [...sortedDates].reverse().map((date) => {
-        const dayOfWeek = date.toLocaleDateString('ja-JP', { weekday: 'short' }).slice(0, 1) // Extract single kanji for day of week
-        const label = date.toLocaleDateString('ja-JP', {
-          month: '2-digit',
-          day: '2-digit',
-        })
-        return `${label}(${dayOfWeek})`
-      })
-      const datasets = CATEGORIES
-        // nopは除外
-        .filter((category) => category.key !== 'nop')
-        .map((category) => {
-          const data = sortedDates
-            .map((date) => {
-              const dateData = dailyActivityDurations[getDateKey(date)]
-              // Data already contains durations in minutes, convert to hours here.
-              return dateData ? (dateData[category.key] || 0) / 60 : 0
-            })
-            .reverse()
-
-          return {
-            label: category.label,
-            backgroundColor: category.color,
-            data: data,
-            stack: 'activities',
-          }
-        })
-        .filter((dataset) => dataset.data.some((d) => d > 0))
-
-      return { labels, datasets }
-    },
-    [],
-  )
+  const createChartData = useCallback((dates: Date[], durations: Record<string, DailyDurations>) => {
+    const sortedDates = [...dates].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
+    const labels = [...sortedDates].reverse().map((date) => {
+      const dayOfWeek = date.toLocaleDateString('ja-JP', { weekday: 'short' }).slice(0, 1)
+      const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
+      return `${label}(${dayOfWeek})`
+    })
+    const datasets = statsService.getChartDatasets(sortedDates, durations, getDateKey)
+    return { labels, datasets }
+  }, [])
 
   useEffect(() => {
     const initialize = async () => {
       setIsLoading(true)
+      const holidayEntries = await activityService.getAllHolidays()
+      const holidayMap = holidayEntries.reduce((acc, entry) => {
+        acc[entry.date] = entry.isHoliday
+        return acc
+      }, {} as Record<string, boolean>)
 
-      // 1. 休日マップの読み込み
-      const holidayEntries = await db.holidays.toArray()
-      const holidayMap = holidayEntries.reduce(
-        (acc, entry) => {
-          acc[entry.date] = entry.isHoliday
-          return acc
-        },
-        {} as Record<string, boolean>,
-      )
-
-      // 2. アクティビティの読み込み
       const today = new Date()
       const startDate = new Date(today.getTime() - 30 * A_DAY_IN_MILLISECONDS)
-      const startDateKey = getDateKey(startDate)
-      const endDateKey = getDateKey(today)
+      const activitiesEntries = await activityService.getActivitiesInRange(getDateKey(startDate), getDateKey(today))
 
-      const activitiesEntries = await db.activities.where('date').between(startDateKey, endDateKey, true, true).toArray()
+      const stats = statsService.calculateDailyDurations(activitiesEntries, holidayMap)
 
-      const holidayDailyActivityDurations: {
-        [dateKey: string]: { [categoryKey: string]: number }
-      } = {}
-      const weekdayDailyActivityDurations: {
-        [dateKey: string]: { [categoryKey: string]: number }
-      } = {}
-      const holidayDatesWithData: Date[] = []
-      const weekdayDatesWithData: Date[] = []
-
-      for (const entry of activitiesEntries) {
-        const date = new Date(entry.date)
-        const dateKey = entry.date
-        const timeSlotsData = entry.slots
-
-        let totalActivitiesInDay = 0
-        const currentDayDurations: { [categoryKey: string]: number } = {}
-
-        for (const slotKey in timeSlotsData) {
-          const activitiesInSlot = timeSlotsData[slotKey] as Activity[]
-          const numActivitiesInSlot = activitiesInSlot.length
-
-          if (numActivitiesInSlot > 0) {
-            totalActivitiesInDay += numActivitiesInSlot
-            const durationPerActivity = 120 / numActivitiesInSlot
-
-            for (const activity of activitiesInSlot) {
-              const categoryKey = activity.categoryKey
-              currentDayDurations[categoryKey] = (currentDayDurations[categoryKey] || 0) + durationPerActivity
-            }
-          }
-        }
-
-        if (totalActivitiesInDay > 0) {
-          if (isHolidayUtil(date, holidayMap)) {
-            holidayDatesWithData.push(date)
-            holidayDailyActivityDurations[dateKey] = currentDayDurations
-          } else {
-            weekdayDatesWithData.push(date)
-            weekdayDailyActivityDurations[dateKey] = currentDayDurations
-          }
-        }
-      }
-
-      setHolidayChartData(createChartData(holidayDatesWithData, holidayDailyActivityDurations))
-      setWeekdayChartData(createChartData(weekdayDatesWithData, weekdayDailyActivityDurations))
-
+      setHolidayChartData(createChartData(stats.holidayDatesWithData, stats.holidayDailyActivityDurations))
+      setWeekdayChartData(createChartData(stats.weekdayDatesWithData, stats.weekdayDailyActivityDurations))
       setIsLoading(false)
     }
-
     initialize()
   }, [createChartData])
 
@@ -221,10 +97,9 @@ const ActivityStats = () => {
   return (
     <div className="p-5">
       <h3 className="mb-4 text-lg font-bold">活動記録グラフ</h3>
-
       {hasData ? (
         <div>
-          {hasHolidayData && (
+          {holidayChartData.datasets.length > 0 && (
             <div className="mt-5">
               <h4 className="mb-2 font-semibold">過去の活動(休日)</h4>
               <div className="relative mx-auto h-125 w-full max-w-200">
@@ -232,7 +107,7 @@ const ActivityStats = () => {
               </div>
             </div>
           )}
-          {hasWeekdayData && (
+          {weekdayChartData.datasets.length > 0 && (
             <div className="mt-5">
               <h4 className="mb-2 font-semibold">過去の活動(平日)</h4>
               <div className="relative mx-auto h-125 w-full max-w-200">
@@ -242,9 +117,7 @@ const ActivityStats = () => {
           )}
         </div>
       ) : (
-        <div>
-          <p>記録された活動データがありません。</p>
-        </div>
+        <p>記録された活動データがありません。</p>
       )}
     </div>
   )

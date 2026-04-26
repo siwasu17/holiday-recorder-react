@@ -1,4 +1,4 @@
-import { CATEGORIES } from '@/constants'
+import CategoryGrid from './CategoryGrid'
 
 interface Props {
   canUndo: boolean
@@ -27,18 +27,7 @@ const TimeTrackerActionFooter = ({ canUndo, canRedo, onSelectCategory, onUndo, o
           Redo ↪
         </button>
       </div>
-      <div className="mt-2.5 grid grid-cols-3 gap-2">
-        {CATEGORIES.map((category) => (
-          <button
-            key={category.key}
-            className="cursor-pointer rounded-sm border-none px-1 py-2 text-[0.8rem]"
-            style={{ backgroundColor: category.color }}
-            onClick={() => onSelectCategory(category.key)}
-          >
-            {category.label}
-          </button>
-        ))}
-      </div>
+      <CategoryGrid onSelectCategory={onSelectCategory} buttonClassName="py-2 px-1" />
     </div>
   )
 }
