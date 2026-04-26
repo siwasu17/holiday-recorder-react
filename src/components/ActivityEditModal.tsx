@@ -45,10 +45,10 @@ const ActivityEditModal = ({
     >
       <div className="w-[90%] max-w-100 rounded-xl bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
         <div className="mb-3.75 flex items-baseline justify-between gap-2.5">
-          <div className="text-[1.5rem] text-[#333]">{categoryLabel}</div>
           <span className="text-[0.8rem] text-[#666]">
             {slotLabel} #{slotIndex + 1}
           </span>
+          <div className="text-[1.5rem] text-[#333]">{categoryLabel}</div>
           <button
             onClick={onDeleteActivity}
             className="cursor-pointer rounded-md border-none bg-[#ff4d4f] p-2.5 text-white"
