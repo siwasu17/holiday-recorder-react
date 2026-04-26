@@ -1,51 +1,53 @@
 import { useState, useMemo } from 'react'
-import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '@/db'
+import { getDateKey } from '@/utils/date'
 import type { Activity } from '@/types'
-import {
-  CATEGORIES,
-  TIME_SLOTS,
-  MAX_ACTIVITIES_PER_SLOT,
-  LOCAL_STORAGE_ACTIVITY_PREFIX,
-  LOCAL_STORAGE_HOLIDAY_MAP_KEY,
-} from '@/constants'
+import { CATEGORIES, TIME_SLOTS, MAX_ACTIVITIES_PER_SLOT } from '@/constants'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter'
 import ActivityEditModal from '@/components/ActivityEditModal'
 
 type ActivityMap = Record<string, Activity[]>
 
-const TimeTracker = () => {
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [prevDate, setPrevDate] = useState(currentDate)
+interface TimeTrackerContentProps {
+  dateKey: string
+  currentDate: Date
+  initialActivities: ActivityMap
+  isHoliday: boolean
+  onPreviousDay: () => void
+  onNextDay: () => void
+  onToggleHoliday: () => void
+}
+
+const TimeTrackerContent = ({
+  dateKey,
+  currentDate,
+  initialActivities,
+  isHoliday,
+  onPreviousDay,
+  onNextDay,
+  onToggleHoliday,
+}: TimeTrackerContentProps) => {
+  const [activities, setActivities] = useState<ActivityMap>(initialActivities)
+  const [actHistories, setActHistories] = useState<ActivityMap[]>([initialActivities])
+  const [actHistoriesIndex, setActHistoriesIndex] = useState(0)
   const [currentTimeSlot, setCurrentTimeSlot] = useState<string | null>(null)
 
-  const [userDefinedHolidayMap, setUserDefinedHolidayMap] = useState<Record<string, boolean>>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
-    return saved ? JSON.parse(saved) : {}
-  })
-
-  const [activities, setActivities] = useState<ActivityMap>(() => {
-    const key = `${LOCAL_STORAGE_ACTIVITY_PREFIX}${getDateKey(currentDate)}`
-    const saved = localStorage.getItem(key)
-    return saved ? JSON.parse(saved) : {}
-  })
-
-  const [actHistories, setActHistories] = useState<ActivityMap[]>([activities])
-  const [actHistoriesIndex, setActHistoriesIndex] = useState(0)
-
-  if (currentDate !== prevDate) {
-    setPrevDate(currentDate)
-    const key = `${LOCAL_STORAGE_ACTIVITY_PREFIX}${getDateKey(currentDate)}`
-    const saved = localStorage.getItem(key)
-    const newActivities = saved ? JSON.parse(saved) : {}
-    setActivities(newActivities)
-    setActHistories([newActivities])
-    setActHistoriesIndex(0)
-  }
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingSlotKey, setEditingSlotKey] = useState<string | null>(null)
   const [editingSlotIndex, setEditingSlotIndex] = useState<number>(-1)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // レンダリング中に初期値の変更を検知して同期する (useEffectを使わないパターン)
+  // 履歴が初期状態（操作前）の場合のみ、外部（DB）からの変更を反映させる
+  const [prevInitialActivities, setPrevInitialActivities] = useState<ActivityMap>(initialActivities)
+  if (initialActivities !== prevInitialActivities) {
+    setPrevInitialActivities(initialActivities)
+    if (actHistories.length === 1 && actHistoriesIndex === 0) {
+      setActivities(initialActivities)
+      setActHistories([initialActivities])
+    }
+  }
 
   const editingActivity = useMemo(() => {
     if (!editingSlotKey || editingSlotIndex === -1) return null
@@ -61,16 +63,14 @@ const TimeTracker = () => {
     })
   }, [currentDate])
 
-  const isHoliday = useMemo(() => {
-    return isHolidayUtil(currentDate, userDefinedHolidayMap)
-  }, [currentDate, userDefinedHolidayMap])
-
   const canUndo = actHistoriesIndex > 0
   const canRedo = actHistoriesIndex + 1 < actHistories.length
 
-  const saveToLocalStorage = (newActivities: ActivityMap) => {
-    const key = `${LOCAL_STORAGE_ACTIVITY_PREFIX}${getDateKey(currentDate)}`
-    localStorage.setItem(key, JSON.stringify(newActivities))
+  const saveToDatabase = async (newActivities: ActivityMap) => {
+    await db.activities.put({
+      date: dateKey,
+      slots: newActivities,
+    })
   }
 
   const saveHistory = (newActivities: ActivityMap) => {
@@ -80,7 +80,7 @@ const TimeTracker = () => {
     setActHistories(newHistories)
     setActHistoriesIndex(newIndex)
     setActivities(newActivities)
-    saveToLocalStorage(newActivities)
+    saveToDatabase(newActivities)
   }
 
   const createActivity = (categoryKey: string): Activity => {
@@ -97,28 +97,6 @@ const TimeTracker = () => {
 
   const getActColor = (categoryKey: string) => {
     return CATEGORIES.find((c) => c.key === categoryKey)?.color ?? '#000000'
-  }
-
-  const changeDay = (days: number) => {
-    const newDate = new Date(currentDate)
-    newDate.setDate(newDate.getDate() + days)
-    setCurrentDate(newDate)
-  }
-
-  const previousDay = () => changeDay(-1)
-  const nextDay = () => changeDay(1)
-
-  const saveUserDefinedHoliday = () => {
-    const dateKey = getDateKey(currentDate)
-    const newMap = { ...userDefinedHolidayMap }
-
-    if (newMap[dateKey] !== undefined) {
-      delete newMap[dateKey]
-    } else {
-      newMap[dateKey] = !isHoliday
-    }
-    setUserDefinedHolidayMap(newMap)
-    localStorage.setItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY, JSON.stringify(newMap))
   }
 
   const moveToNextSlot = (currentSlot: string) => {
@@ -149,7 +127,7 @@ const TimeTracker = () => {
     const targetState = actHistories[newIndex]
     setActHistoriesIndex(newIndex)
     setActivities(targetState)
-    saveToLocalStorage(targetState)
+    saveToDatabase(targetState)
   }
 
   const redoAct = () => {
@@ -158,7 +136,7 @@ const TimeTracker = () => {
     const targetState = actHistories[newIndex]
     setActHistoriesIndex(newIndex)
     setActivities(targetState)
-    saveToLocalStorage(targetState)
+    saveToDatabase(targetState)
   }
 
   const selectTimeSlot = (timeSlotKey: string) => {
@@ -216,9 +194,9 @@ const TimeTracker = () => {
       <TimeTrackerToolbar
         formattedDate={formattedDate}
         isHoliday={isHoliday}
-        onPreviousDay={previousDay}
-        onNextDay={nextDay}
-        onToggleHoliday={saveUserDefinedHoliday}
+        onPreviousDay={onPreviousDay}
+        onNextDay={onNextDay}
+        onToggleHoliday={onToggleHoliday}
       />
 
       <main className="flex-1 overflow-y-auto pb-57.5">
@@ -281,6 +259,68 @@ const TimeTracker = () => {
         onRedo={redoAct}
       />
     </div>
+  )
+}
+
+const TimeTracker = () => {
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const dateKey = useMemo(() => getDateKey(currentDate), [currentDate])
+// DBからデータを取得
+// 見つからない場合は null を返すようにして、読み込み中の undefined と区別する
+const dbActivityEntry = useLiveQuery(async () => {
+  const entry = await db.activities.get(dateKey)
+  return entry || null
+}, [dateKey])
+
+const dbHolidayEntry = useLiveQuery(async () => {
+  const entry = await db.holidays.get(dateKey)
+  return entry || null
+}, [dateKey])
+
+
+  const isHoliday = useMemo(() => {
+    const userDefined = dbHolidayEntry?.isHoliday
+    if (userDefined !== undefined) return userDefined
+    const dayOfWeek = currentDate.getDay()
+    return dayOfWeek === 0 || dayOfWeek === 6
+  }, [currentDate, dbHolidayEntry])
+
+  const changeDay = (days: number) => {
+    const newDate = new Date(currentDate)
+    newDate.setDate(newDate.getDate() + days)
+    setCurrentDate(newDate)
+  }
+
+  const previousDay = () => changeDay(-1)
+  const nextDay = () => changeDay(1)
+
+  const saveUserDefinedHoliday = async () => {
+    await db.holidays.put({
+      date: dateKey,
+      isHoliday: !isHoliday,
+    })
+  }
+
+  // DBからデータが読み込まれるまでは待機
+  if (dbActivityEntry === undefined) {
+    return (
+      <div className="flex h-full items-center justify-center p-5">
+        <div className="text-gray-500 text-sm">読み込み中...</div>
+      </div>
+    )
+  }
+
+  return (
+    <TimeTrackerContent
+      key={dateKey} // 日付ごとにコンポーネントを再生成することでステートをリセット
+      dateKey={dateKey}
+      currentDate={currentDate}
+      initialActivities={dbActivityEntry?.slots ?? {}}
+      isHoliday={isHoliday}
+      onPreviousDay={previousDay}
+      onNextDay={nextDay}
+      onToggleHoliday={saveUserDefinedHoliday}
+    />
   )
 }
 

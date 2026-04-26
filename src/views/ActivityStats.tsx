@@ -2,12 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import type { Activity } from '@/types'
-import {
-  CATEGORIES,
-  A_DAY_IN_MILLISECONDS,
-  LOCAL_STORAGE_ACTIVITY_PREFIX,
-  LOCAL_STORAGE_HOLIDAY_MAP_KEY,
-} from '@/constants'
+import { db } from '@/db'
+import { CATEGORIES, A_DAY_IN_MILLISECONDS } from '@/constants'
 import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
@@ -141,15 +137,27 @@ const ActivityStats = () => {
   )
 
   useEffect(() => {
-    const initialize = () => {
+    const initialize = async () => {
       setIsLoading(true)
 
       // 1. 休日マップの読み込み
-      const savedHolidayMap = localStorage.getItem(LOCAL_STORAGE_HOLIDAY_MAP_KEY)
-      const holidayMap = savedHolidayMap ? JSON.parse(savedHolidayMap) : {}
+      const holidayEntries = await db.holidays.toArray()
+      const holidayMap = holidayEntries.reduce(
+        (acc, entry) => {
+          acc[entry.date] = entry.isHoliday
+          return acc
+        },
+        {} as Record<string, boolean>,
+      )
 
       // 2. アクティビティの読み込み
       const today = new Date()
+      const startDate = new Date(today.getTime() - 30 * A_DAY_IN_MILLISECONDS)
+      const startDateKey = getDateKey(startDate)
+      const endDateKey = getDateKey(today)
+
+      const activitiesEntries = await db.activities.where('date').between(startDateKey, endDateKey, true, true).toArray()
+
       const holidayDailyActivityDurations: {
         [dateKey: string]: { [categoryKey: string]: number }
       } = {}
@@ -159,43 +167,36 @@ const ActivityStats = () => {
       const holidayDatesWithData: Date[] = []
       const weekdayDatesWithData: Date[] = []
 
-      // 直近30日分くらいを探索対象とする
-      for (let i = 0; i < 30; i++) {
-        const date = new Date(today.getTime() - i * A_DAY_IN_MILLISECONDS)
-        const dateKey = getDateKey(date)
-        const storageKey = `${LOCAL_STORAGE_ACTIVITY_PREFIX}${dateKey}`
-        const saved = localStorage.getItem(storageKey)
+      for (const entry of activitiesEntries) {
+        const date = new Date(entry.date)
+        const dateKey = entry.date
+        const timeSlotsData = entry.slots
 
-        if (saved) {
-          const timeSlotsData = JSON.parse(saved)
+        let totalActivitiesInDay = 0
+        const currentDayDurations: { [categoryKey: string]: number } = {}
 
-          let totalActivitiesInDay = 0
-          const currentDayDurations: { [categoryKey: string]: number } = {}
+        for (const slotKey in timeSlotsData) {
+          const activitiesInSlot = timeSlotsData[slotKey] as Activity[]
+          const numActivitiesInSlot = activitiesInSlot.length
 
-          for (const slotKey in timeSlotsData) {
-            const activitiesInSlot = timeSlotsData[slotKey] as Activity[]
-            const numActivitiesInSlot = activitiesInSlot.length
+          if (numActivitiesInSlot > 0) {
+            totalActivitiesInDay += numActivitiesInSlot
+            const durationPerActivity = 120 / numActivitiesInSlot
 
-            if (numActivitiesInSlot > 0) {
-              totalActivitiesInDay += numActivitiesInSlot
-              const durationPerActivity = 120 / numActivitiesInSlot
-
-              for (const activity of activitiesInSlot) {
-                const categoryKey = activity.categoryKey
-                currentDayDurations[categoryKey] = (currentDayDurations[categoryKey] || 0) + durationPerActivity
-              }
+            for (const activity of activitiesInSlot) {
+              const categoryKey = activity.categoryKey
+              currentDayDurations[categoryKey] = (currentDayDurations[categoryKey] || 0) + durationPerActivity
             }
           }
+        }
 
-          if (totalActivitiesInDay > 0) {
-            // ステートの更新を待たずに、パースしたばかりのマップを直接使う
-            if (isHolidayUtil(date, holidayMap)) {
-              holidayDatesWithData.push(date)
-              holidayDailyActivityDurations[dateKey] = currentDayDurations
-            } else {
-              weekdayDatesWithData.push(date)
-              weekdayDailyActivityDurations[dateKey] = currentDayDurations
-            }
+        if (totalActivitiesInDay > 0) {
+          if (isHolidayUtil(date, holidayMap)) {
+            holidayDatesWithData.push(date)
+            holidayDailyActivityDurations[dateKey] = currentDayDurations
+          } else {
+            weekdayDatesWithData.push(date)
+            weekdayDailyActivityDurations[dateKey] = currentDayDurations
           }
         }
       }
