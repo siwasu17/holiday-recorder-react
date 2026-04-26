@@ -94,19 +94,22 @@ const TimeTrackerContent = ({
                 {(activities[slot.start] ?? []).map((activity, index) => (
                   <div
                     key={index}
-                    className="box-border flex h-5 w-full flex-col items-center justify-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1] text-ellipsis whitespace-nowrap"
+                    className="box-border grid grid-cols-[1fr_auto_1fr] h-5 w-full items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1]"
                     style={{ backgroundColor: getActColor(activity.categoryKey) }}
                     onClick={(e) => {
                       e.stopPropagation()
                       openEditModal(slot.start, index)
                     }}
                   >
-                    <span className="activity-label">{getActLabel(activity.categoryKey)}</span>
-                    {activity.memo && (
-                      <div className="mt-0.5 max-w-full overflow-hidden rounded-[3px] bg-white p-[1px_4px] text-[0.8em] text-ellipsis whitespace-nowrap text-[#333]">
-                        {activity.memo}
-                      </div>
-                    )}
+                    <div /> {/* 左側のスペーサー */}
+                    <span className="activity-label whitespace-nowrap">{getActLabel(activity.categoryKey)}</span>
+                    <div className="flex justify-start pl-1 overflow-hidden">
+                      {activity.memo && (
+                        <div className="rounded-[3px] bg-white/60 p-[0px_4px] text-[0.85em] text-ellipsis whitespace-nowrap text-[#333]">
+                          {activity.memo}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
