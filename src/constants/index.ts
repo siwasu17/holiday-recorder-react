@@ -29,6 +29,7 @@ export const TIME_SLOTS: TimeSlot[] = [
 ]
 
 export const MAX_ACTIVITIES_PER_SLOT = 4
+export const ACTIVITY_DURATION_MINUTES = 30
 
 export const LOCAL_STORAGE_ACTIVITY_PREFIX = 'activities-'
 export const LOCAL_STORAGE_HOLIDAY_MAP_KEY = 'userDefinedHolidayMap'
