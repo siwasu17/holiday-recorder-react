@@ -1,5 +1,5 @@
 import type { Activity } from '@/types'
-import { CATEGORIES } from '@/constants'
+import { CATEGORIES, ACTIVITY_DURATION_MINUTES } from '@/constants'
 import { isHoliday as isHolidayUtil } from '@/utils/date'
 
 export interface DailyDurations {
@@ -34,11 +34,10 @@ export const statsService = {
 
         if (numActivitiesInSlot > 0) {
           totalActivitiesInDay += numActivitiesInSlot
-          const durationPerActivity = 120 / numActivitiesInSlot
 
           for (const activity of activitiesInSlot) {
             const categoryKey = activity.categoryKey
-            currentDayDurations[categoryKey] = (currentDayDurations[categoryKey] || 0) + durationPerActivity
+            currentDayDurations[categoryKey] = (currentDayDurations[categoryKey] || 0) + ACTIVITY_DURATION_MINUTES
           }
         }
       }

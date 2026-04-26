@@ -80,7 +80,7 @@ const TimeTrackerContent = ({
             <div
               key={slot.start}
               onClick={() => setCurrentTimeSlot(slot.start)}
-              className={`border-border-main grid min-h-15 cursor-pointer grid-cols-[80px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${currentTimeSlot === slot.start ? 'bg-accent-soft' : ''}`}
+              className={`border-border-main grid min-h-32 cursor-pointer grid-cols-[80px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${currentTimeSlot === slot.start ? 'bg-accent-soft' : ''}`}
               role="row"
             >
               <div
@@ -90,11 +90,11 @@ const TimeTrackerContent = ({
                 {slot.label}
               </div>
 
-              <div className="flex flex-col gap-0.5 p-1" role="cell">
+              <div className="flex flex-col p-1" role="cell">
                 {(activities[slot.start] ?? []).map((activity, index) => (
                   <div
                     key={index}
-                    className="box-border flex w-full grow flex-col items-center justify-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.2] text-ellipsis whitespace-nowrap"
+                    className="box-border mb-0.5 flex h-7.5 w-full flex-col items-center justify-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.2] text-ellipsis whitespace-nowrap"
                     style={{ backgroundColor: getActColor(activity.categoryKey) }}
                     onClick={(e) => {
                       e.stopPropagation()
