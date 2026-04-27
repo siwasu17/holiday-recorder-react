@@ -7,6 +7,62 @@ import { useActivityManager } from '@/hooks/useActivityManager'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter'
 import ActivityEditModal from '@/components/ActivityEditModal'
+import type { TimeSlot, Activity } from '@/types'
+
+const getActLabel = (categoryKey: string) => {
+  return CATEGORIES.find((c) => c.key === categoryKey)?.label ?? '不明'
+}
+
+const getActColor = (categoryKey: string) => {
+  return CATEGORIES.find((c) => c.key === categoryKey)?.color ?? '#000000'
+}
+
+interface TimeSlotRowProps {
+  slot: TimeSlot
+  activities: Activity[]
+  isActive: boolean
+  onClick: () => void
+  onActivityClick: (slotStart: string, index: number) => void
+}
+
+const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: TimeSlotRowProps) => (
+  <div
+    onClick={onClick}
+    className={`border-border-main grid h-22 cursor-pointer grid-cols-[54px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${isActive ? 'bg-accent-soft' : ''}`}
+    role="row"
+  >
+    <div
+      className="text-text-sub flex items-center justify-center bg-[#f1efea] p-1 text-[0.7rem] font-bold leading-tight text-center"
+      role="cell"
+    >
+      {slot.label}
+    </div>
+
+    <div className="flex flex-1 flex-col gap-0.5 p-1 overflow-hidden" role="cell">
+      {activities.map((activity, index) => (
+        <div
+          key={index}
+          className="box-border grid grid-cols-[1fr_auto_1fr] h-5 w-full items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1]"
+          style={{ backgroundColor: getActColor(activity.categoryKey) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onActivityClick(slot.start, index)
+          }}
+        >
+          <div />
+          <span className="activity-label whitespace-nowrap">{getActLabel(activity.categoryKey)}</span>
+          <div className="flex justify-start pl-1 overflow-hidden">
+            {activity.memo && (
+              <div className="rounded-[3px] bg-white/60 p-[0px_4px] text-[0.85em] text-ellipsis whitespace-nowrap text-[#333]">
+                {activity.memo}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)
 
 interface TimeTrackerContentProps {
   dateKey: string
@@ -56,14 +112,6 @@ const TimeTrackerContent = ({
     })
   }, [currentDate])
 
-  const getActLabel = (categoryKey: string) => {
-    return CATEGORIES.find((c) => c.key === categoryKey)?.label ?? '不明'
-  }
-
-  const getActColor = (categoryKey: string) => {
-    return CATEGORIES.find((c) => c.key === categoryKey)?.color ?? '#000000'
-  }
-
   return (
     <div className="flex h-[calc(100dvh-(var(--spacing-header)))] flex-col">
       <TimeTrackerToolbar
@@ -75,46 +123,33 @@ const TimeTrackerContent = ({
       />
 
       <main className="flex-1 overflow-y-auto pb-57.5">
-        <div className="border-border-main flex w-full flex-col border-t" role="table">
-          {TIME_SLOTS.map((slot) => (
-            <div
-              key={slot.start}
-              onClick={() => setCurrentTimeSlot(slot.start)}
-              className={`border-border-main grid min-h-22 cursor-pointer grid-cols-[80px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${currentTimeSlot === slot.start ? 'bg-accent-soft' : ''}`}
-              role="row"
-            >
-              <div
-                className="text-text-sub flex items-center justify-center bg-[#f1efea] p-1 text-[0.8rem] font-bold"
-                role="cell"
-              >
-                {slot.label}
-              </div>
-
-              <div className="flex flex-col gap-0.5 p-1" role="cell">
-                {(activities[slot.start] ?? []).map((activity, index) => (
-                  <div
-                    key={index}
-                    className="box-border grid grid-cols-[1fr_auto_1fr] h-5 w-full items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1]"
-                    style={{ backgroundColor: getActColor(activity.categoryKey) }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      openEditModal(slot.start, index)
-                    }}
-                  >
-                    <div /> {/* 左側のスペーサー */}
-                    <span className="activity-label whitespace-nowrap">{getActLabel(activity.categoryKey)}</span>
-                    <div className="flex justify-start pl-1 overflow-hidden">
-                      {activity.memo && (
-                        <div className="rounded-[3px] bg-white/60 p-[0px_4px] text-[0.85em] text-ellipsis whitespace-nowrap text-[#333]">
-                          {activity.memo}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div className="border-border-main grid w-full grid-cols-2 border-t" role="table">
+          {/* 左列（前半のスロット） */}
+          <div className="flex flex-col border-r border-border-main">
+            {TIME_SLOTS.slice(0, Math.ceil(TIME_SLOTS.length / 2)).map((slot) => (
+              <TimeSlotRow
+                key={slot.start}
+                slot={slot}
+                activities={activities[slot.start] ?? []}
+                isActive={currentTimeSlot === slot.start}
+                onClick={() => setCurrentTimeSlot(slot.start)}
+                onActivityClick={openEditModal}
+              />
+            ))}
+          </div>
+          {/* 右列（後半のスロット） */}
+          <div className="flex flex-col">
+            {TIME_SLOTS.slice(Math.ceil(TIME_SLOTS.length / 2)).map((slot) => (
+              <TimeSlotRow
+                key={slot.start}
+                slot={slot}
+                activities={activities[slot.start] ?? []}
+                isActive={currentTimeSlot === slot.start}
+                onClick={() => setCurrentTimeSlot(slot.start)}
+                onActivityClick={openEditModal}
+              />
+            ))}
+          </div>
         </div>
       </main>
 
