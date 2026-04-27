@@ -21,7 +21,8 @@ export const statsService = {
     const weekdayDatesWithData: Date[] = []
 
     for (const entry of activitiesEntries) {
-      const date = new Date(entry.date.replace(/-/g, '/'))
+      const [year, month, day] = entry.date.split('-').map(Number)
+      const date = new Date(year, month - 1, day)
       const dateKey = entry.date
       const timeSlotsData = entry.slots
 
