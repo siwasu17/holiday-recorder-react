@@ -53,7 +53,7 @@ const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: T
           <span className="activity-label whitespace-nowrap">{getActLabel(activity.categoryKey)}</span>
           <div className="flex justify-start pl-1 overflow-hidden">
             {activity.memo && (
-              <div className="rounded-[3px] bg-white/60 p-[0px_4px] text-[0.85em] text-ellipsis whitespace-nowrap text-[#333]">
+              <div className="rounded-[3px] bg-white/60 p-[0px_4px] text-[0.85em] text-ellipsis overflow-hidden whitespace-nowrap text-[#333]">
                 {activity.memo}
               </div>
             )}
