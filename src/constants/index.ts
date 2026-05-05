@@ -17,15 +17,15 @@ export const CATEGORIES: Category[] = [
 ]
 
 export const TIME_SLOTS: TimeSlot[] = [
-  { start: '08:00', label: '8 - 10' },
-  { start: '10:00', label: '10 - 12' },
-  { start: '12:00', label: '12 - 14' },
-  { start: '14:00', label: '14 - 16' },
-  { start: '16:00', label: '16 - 18' },
-  { start: '18:00', label: '18 - 20' },
-  { start: '20:00', label: '20 - 22' },
-  { start: '22:00', label: '22 - 24' },
-  { start: '00:00+', label: '24 - 26' },
+  { start: '08:00', label: '8-' },
+  { start: '10:00', label: '10-' },
+  { start: '12:00', label: '12-' },
+  { start: '14:00', label: '14-' },
+  { start: '16:00', label: '16-' },
+  { start: '18:00', label: '18-' },
+  { start: '20:00', label: '20-' },
+  { start: '22:00', label: '22-' },
+  { start: '00:00+', label: '24-' },
 ]
 
 export const MAX_ACTIVITIES_PER_SLOT = 4
