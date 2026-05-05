@@ -28,7 +28,7 @@ interface TimeSlotRowProps {
 const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: TimeSlotRowProps) => (
   <div
     onClick={onClick}
-    className={`border-border-main grid h-22 cursor-pointer grid-cols-[54px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${isActive ? 'bg-accent-soft' : ''}`}
+    className={`border-border-main grid h-24 cursor-pointer grid-cols-[38px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${isActive ? 'bg-accent-soft' : ''}`}
     role="row"
   >
     <div
