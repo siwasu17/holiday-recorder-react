@@ -13,9 +13,10 @@ import {
 import { Bar } from 'react-chartjs-2'
 import { activityService } from '@/services/activityService'
 import { statsService, DailyDurations, StatsResult } from '@/services/statsService'
-import { A_DAY_IN_MILLISECONDS, THEME_COLORS } from '@/constants'
+import { A_DAY_IN_MILLISECONDS } from '@/constants'
 import { getDateKey } from '@/utils/date'
 import { useThemeContext } from '@/hooks/useThemeContext'
+import { getCssVariableValue } from '@/utils/theme'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
@@ -25,9 +26,9 @@ const ActivityStats = () => {
   const [stats, setStats] = useState<StatsResult | null>(null)
 
   const chartOptions = useMemo<ChartOptions<'bar'>>(() => {
-    const colors = isDark ? THEME_COLORS.dark : THEME_COLORS.light
-    const textColor = colors.textMain
-    const gridColor = colors.grid
+    // CSS変数から直接値を取得（isDark を依存配列に入れることでテーマ変更時に再取得される）
+    const textColor = getCssVariableValue('--color-text-main')
+    const gridColor = getCssVariableValue('--color-chart-grid')
 
     return {
       responsive: true,
@@ -62,6 +63,8 @@ const ActivityStats = () => {
         },
       },
     }
+    // theme 変更時に CSS 変数を再取得させるため、isDark をトリガーとして依存配列に含める
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDark])
 
   const createChartData = useCallback(

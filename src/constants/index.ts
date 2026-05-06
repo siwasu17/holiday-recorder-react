@@ -36,16 +36,3 @@ export const LOCAL_STORAGE_HOLIDAY_MAP_KEY = 'userDefinedHolidayMap'
 
 export const A_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 
-export const THEME_COLORS = {
-  light: {
-    textMain: '#4a4945',
-    textSub: '#8c8b85',
-    grid: 'rgba(0, 0, 0, 0.1)',
-  },
-  dark: {
-    textMain: '#e0e0e0',
-    textSub: '#a0a0a0',
-    grid: 'rgba(255, 255, 255, 0.1)',
-  },
-} as const
-
