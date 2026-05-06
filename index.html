@@ -9,8 +9,21 @@
     <link rel="apple-touch-icon" href="/holiday-recorder-react/apple-touch-icon-180x180.png" />
     <meta name="theme-color" content="#E5E5E5" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#171717" media="(prefers-color-scheme: dark)" />
-    <script type="module" crossorigin src="/holiday-recorder-react/assets/index-3-_ep04i.js"></script>
-    <link rel="stylesheet" crossorigin href="/holiday-recorder-react/assets/index-Ce4alzfB.css">
+    <script>
+      (function() {
+        try {
+          const theme = localStorage.getItem('theme') || 'system';
+          const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/holiday-recorder-react/assets/index-UzdkqDgG.js"></script>
+    <link rel="stylesheet" crossorigin href="/holiday-recorder-react/assets/index-CMRMjLFR.css">
   <link rel="manifest" href="/holiday-recorder-react/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/holiday-recorder-react/registerSW.js"></script></head>
   <body>
     <div id="root"></div>
