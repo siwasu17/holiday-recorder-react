@@ -21,13 +21,8 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const ActivityStats = () => {
   const [isLoading, setIsLoading] = useState(true)
-  const { theme } = useThemeContext()
+  const { isDark } = useThemeContext()
   const [stats, setStats] = useState<StatsResult | null>(null)
-
-  const isDark = useMemo(
-    () => theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches),
-    [theme],
-  )
 
   const chartOptions = useMemo<ChartOptions<'bar'>>(() => {
     const textColor = isDark ? '#e0e0e0' : '#4a4945'

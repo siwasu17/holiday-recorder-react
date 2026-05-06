@@ -27,9 +27,7 @@ const ActivityEditModal = ({
 }: Props) => {
   const [prevActivity, setPrevActivity] = useState(activity)
   const [memo, setMemo] = useState(activity?.memo || '')
-  const { theme } = useThemeContext()
-  const isDark =
-    theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const { isDark } = useThemeContext()
 
   if (activity !== prevActivity) {
     setPrevActivity(activity)

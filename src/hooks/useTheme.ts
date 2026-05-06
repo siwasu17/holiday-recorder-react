@@ -7,15 +7,23 @@ export const useTheme = () => {
     return (localStorage.getItem('theme') as Theme) || 'system';
   });
 
+  const [isDark, setIsDark] = useState(() => {
+    return (
+      theme === 'dark' ||
+      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    );
+  });
+
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     const applyTheme = () => {
-      const isDark = 
-        theme === 'dark' || 
+      const dark =
+        theme === 'dark' ||
         (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      
-      if (isDark) {
+
+      setIsDark(dark);
+      if (dark) {
         root.classList.add('dark');
       } else {
         root.classList.remove('dark');
@@ -33,5 +41,5 @@ export const useTheme = () => {
     }
   }, [theme]);
 
-  return { theme, setTheme };
+  return { theme, setTheme, isDark };
 };

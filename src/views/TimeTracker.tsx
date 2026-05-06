@@ -29,9 +29,7 @@ interface TimeSlotRowProps {
 }
 
 const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: TimeSlotRowProps) => {
-  const { theme } = useThemeContext()
-  const isDark =
-    theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const { isDark } = useThemeContext()
 
   return (
     <div

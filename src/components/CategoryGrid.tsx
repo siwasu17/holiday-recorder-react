@@ -7,9 +7,7 @@ interface Props {
 }
 
 const CategoryGrid = ({ onSelectCategory, buttonClassName }: Props) => {
-  const { theme } = useThemeContext()
-  const isDark =
-    theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const { isDark } = useThemeContext()
 
   return (
     <div className="mt-2.5 grid grid-cols-3 gap-2">
