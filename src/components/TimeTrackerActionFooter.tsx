@@ -15,14 +15,14 @@ const TimeTrackerActionFooter = ({ canUndo, canRedo, onSelectCategory, onUndo, o
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className="cursor-pointer rounded-[15px] border border-[#ddd] bg-none px-3 py-0.5 text-[0.8rem] text-[#666] transition-all duration-200 enabled:hover:border-[#bbb] enabled:hover:bg-[#f9f9f9] disabled:cursor-not-allowed disabled:border-[#eee] disabled:text-[#ccc]"
+          className="border-border-main text-text-sub enabled:hover:bg-accent-soft disabled:text-text-sub/30 cursor-pointer rounded-[15px] border bg-none px-3 py-0.5 text-[0.8rem] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
           ↩ Undo
         </button>
         <button
           onClick={onRedo}
           disabled={!canRedo}
-          className="cursor-pointer rounded-[15px] border border-[#ddd] bg-none px-3 py-0.5 text-[0.8rem] text-[#666] transition-all duration-200 enabled:hover:border-[#bbb] enabled:hover:bg-[#f9f9f9] disabled:cursor-not-allowed disabled:border-[#eee] disabled:text-[#ccc]"
+          className="border-border-main text-text-sub enabled:hover:bg-accent-soft disabled:text-text-sub/30 cursor-pointer rounded-[15px] border bg-none px-3 py-0.5 text-[0.8rem] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Redo ↪
         </button>

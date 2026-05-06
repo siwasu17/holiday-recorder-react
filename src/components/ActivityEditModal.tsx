@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import type { Activity } from '@/types'
 import { CATEGORIES } from '@/constants'
 import CategoryGrid from './CategoryGrid'
+import { useThemeContext } from '@/hooks/useThemeContext'
 
 interface Props {
   show: boolean
@@ -26,29 +27,37 @@ const ActivityEditModal = ({
 }: Props) => {
   const [prevActivity, setPrevActivity] = useState(activity)
   const [memo, setMemo] = useState(activity?.memo || '')
+  const { isDark } = useThemeContext()
 
   if (activity !== prevActivity) {
     setPrevActivity(activity)
     setMemo(activity?.memo || '')
   }
 
-  const categoryLabel = useMemo(() => {
-    return CATEGORIES.find((c) => c.key === activity?.categoryKey)?.label ?? '不明'
+  const category = useMemo(() => {
+    return CATEGORIES.find((c) => c.key === activity?.categoryKey)
   }, [activity])
 
   if (!show) return null
+
+  const categoryColor = category ? (isDark ? category.darkColor : category.color) : 'transparent'
 
   return (
     <div
       className="fixed top-0 left-0 z-1000 flex h-full w-full items-center justify-center bg-[rgba(0,0,0,0.6)]"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-[90%] max-w-100 rounded-xl bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+      <div className="bg-surface w-[90%] max-w-100 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
         <div className="mb-3.75 flex items-baseline justify-between gap-2.5">
-          <span className="text-[0.8rem] text-[#666]">
+          <span className="text-text-sub text-[0.8rem]">
             {slotLabel} #{slotIndex + 1}
           </span>
-          <div className="text-[1.5rem] text-[#333]">{categoryLabel}</div>
+          <div
+            className="rounded-md p-[4px_12px] text-[1.2rem] font-bold transition-colors duration-200 text-text-main"
+            style={{ backgroundColor: categoryColor }}
+          >
+            {category?.label ?? '不明'}
+          </div>
           <button
             onClick={onDeleteActivity}
             className="cursor-pointer rounded-md border-none bg-[#ff4d4f] p-2.5 text-white"
@@ -58,7 +67,7 @@ const ActivityEditModal = ({
         </div>
 
         <div>
-          <p>別のカテゴリに変更：</p>
+          <p className="text-text-main">別のカテゴリに変更：</p>
           <CategoryGrid onSelectCategory={onUpdateActivityCategory} buttonClassName="p-[8px_4px]" />
         </div>
 
@@ -69,7 +78,7 @@ const ActivityEditModal = ({
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
             placeholder="メモを入力"
-            className="grow rounded-md border border-[#ccc] p-[8px_10px] text-[1rem]"
+            className="border-border-main bg-surface text-text-main grow rounded-md border p-[8px_10px] text-[1rem]"
           />
         </div>
 
@@ -80,7 +89,7 @@ const ActivityEditModal = ({
           >
             保存
           </button>
-          <button onClick={onClose} className="cursor-pointer rounded-md border-none bg-[#f0f0f0] p-2.5">
+          <button onClick={onClose} className="bg-accent-soft text-text-main cursor-pointer rounded-md border-none p-2.5">
             キャンセル
           </button>
         </div>

@@ -1,39 +1,43 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartData, ChartOptions } from 'chart.js'
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ChartData,
+  ChartOptions,
+} from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import { activityService } from '@/services/activityService'
-import { statsService, DailyDurations } from '@/services/statsService'
+import { statsService, DailyDurations, StatsResult } from '@/services/statsService'
 import { A_DAY_IN_MILLISECONDS } from '@/constants'
 import { getDateKey } from '@/utils/date'
+import { useThemeContext } from '@/hooks/useThemeContext'
+import { getCssVariableValue } from '@/utils/theme'
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const ActivityStats = () => {
   const [isLoading, setIsLoading] = useState(true)
-  const [holidayChartData, setHolidayChartData] = useState<ChartData<'bar'>>({
-    labels: [],
-    datasets: [],
-  })
-  const [weekdayChartData, setWeekdayChartData] = useState<ChartData<'bar'>>({
-    labels: [],
-    datasets: [],
-  })
+  const { isDark } = useThemeContext()
+  const [stats, setStats] = useState<StatsResult | null>(null)
 
-  const hasData = useMemo(
-    () =>
-      (holidayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false) ||
-      (weekdayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false),
-    [holidayChartData, weekdayChartData],
-  )
+  const chartOptions = useMemo<ChartOptions<'bar'>>(() => {
+    // CSS変数から直接値を取得（isDark を依存配列に入れることでテーマ変更時に再取得される）
+    const textColor = getCssVariableValue('--color-text-main')
+    const gridColor = getCssVariableValue('--color-chart-grid')
 
-  const chartOptions = useMemo<ChartOptions<'bar'>>(
-    () => ({
+    return {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 1000, easing: 'easeOutQuart' as const },
       interaction: { mode: 'nearest' as const, intersect: true },
       plugins: {
-        title: { display: true, text: '日別 活動時間' },
+        title: { display: true, text: '日別 活動時間', color: textColor },
+        legend: { labels: { color: textColor } },
         tooltip: {
           callbacks: {
             label: (context) => {
@@ -46,45 +50,76 @@ const ActivityStats = () => {
         },
       },
       scales: {
-        x: { stacked: true },
-        y: { stacked: true, title: { display: true, text: '合計時間' } },
+        x: {
+          stacked: true,
+          ticks: { color: textColor },
+          grid: { color: gridColor },
+        },
+        y: {
+          stacked: true,
+          title: { display: true, text: '合計時間', color: textColor },
+          ticks: { color: textColor },
+          grid: { color: gridColor },
+        },
       },
-    }),
-    [],
+    }
+    // theme 変更時に CSS 変数を再取得させるため、isDark をトリガーとして依存配列に含める
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDark])
+
+  const createChartData = useCallback(
+    (dates: Date[], durations: Record<string, DailyDurations>) => {
+      const sortedDates = [...dates].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
+      const labels = [...sortedDates].reverse().map((date) => {
+        const dayOfWeek = date.toLocaleDateString('ja-JP', { weekday: 'short' }).slice(0, 1)
+        const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
+        return `${label}(${dayOfWeek})`
+      })
+      const datasets = statsService.getChartDatasets(sortedDates, durations, getDateKey, isDark)
+      return { labels, datasets }
+    },
+    [isDark],
   )
 
-  const createChartData = useCallback((dates: Date[], durations: Record<string, DailyDurations>) => {
-    const sortedDates = [...dates].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
-    const labels = [...sortedDates].reverse().map((date) => {
-      const dayOfWeek = date.toLocaleDateString('ja-JP', { weekday: 'short' }).slice(0, 1)
-      const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
-      return `${label}(${dayOfWeek})`
-    })
-    const datasets = statsService.getChartDatasets(sortedDates, durations, getDateKey)
-    return { labels, datasets }
-  }, [])
+  const holidayChartData = useMemo<ChartData<'bar'>>(() => {
+    if (!stats) return { labels: [], datasets: [] }
+    return createChartData(stats.holidayDatesWithData, stats.holidayDailyActivityDurations)
+  }, [stats, createChartData])
+
+  const weekdayChartData = useMemo<ChartData<'bar'>>(() => {
+    if (!stats) return { labels: [], datasets: [] }
+    return createChartData(stats.weekdayDatesWithData, stats.weekdayDailyActivityDurations)
+  }, [stats, createChartData])
+
+  const hasData = useMemo(
+    () =>
+      (holidayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false) ||
+      (weekdayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false),
+    [holidayChartData, weekdayChartData],
+  )
 
   useEffect(() => {
     const initialize = async () => {
       setIsLoading(true)
       const holidayEntries = await activityService.getAllHolidays()
-      const holidayMap = holidayEntries.reduce((acc, entry) => {
-        acc[entry.date] = entry.isHoliday
-        return acc
-      }, {} as Record<string, boolean>)
+      const holidayMap = holidayEntries.reduce(
+        (acc, entry) => {
+          acc[entry.date] = entry.isHoliday
+          return acc
+        },
+        {} as Record<string, boolean>,
+      )
 
       const today = new Date()
       const startDate = new Date(today.getTime() - 30 * A_DAY_IN_MILLISECONDS)
       const activitiesEntries = await activityService.getActivitiesInRange(getDateKey(startDate), getDateKey(today))
 
-      const stats = statsService.calculateDailyDurations(activitiesEntries, holidayMap)
-
-      setHolidayChartData(createChartData(stats.holidayDatesWithData, stats.holidayDailyActivityDurations))
-      setWeekdayChartData(createChartData(stats.weekdayDatesWithData, stats.weekdayDailyActivityDurations))
+      const calculatedStats = statsService.calculateDailyDurations(activitiesEntries, holidayMap)
+      setStats(calculatedStats)
       setIsLoading(false)
     }
     initialize()
-  }, [createChartData])
+  }, [])
 
   if (isLoading) {
     return (
@@ -95,13 +130,13 @@ const ActivityStats = () => {
   }
 
   return (
-    <div className="p-5">
+    <div className="text-text-main p-5">
       <h3 className="mb-4 text-lg font-bold">活動記録グラフ</h3>
       {hasData ? (
         <div>
           {holidayChartData.datasets.length > 0 && (
             <div className="mt-5">
-              <h4 className="mb-2 font-semibold">過去の活動(休日)</h4>
+              <h4 className="text-text-sub mb-2 font-semibold">過去の活動(休日)</h4>
               <div className="relative mx-auto h-125 w-full max-w-200">
                 <Bar data={holidayChartData} options={chartOptions} />
               </div>
@@ -109,7 +144,7 @@ const ActivityStats = () => {
           )}
           {weekdayChartData.datasets.length > 0 && (
             <div className="mt-5">
-              <h4 className="mb-2 font-semibold">過去の活動(平日)</h4>
+              <h4 className="text-text-sub mb-2 font-semibold">過去の活動(平日)</h4>
               <div className="relative mx-auto h-125 w-full max-w-200">
                 <Bar data={weekdayChartData} options={chartOptions} />
               </div>
@@ -117,7 +152,7 @@ const ActivityStats = () => {
           )}
         </div>
       ) : (
-        <p>記録された活動データがありません。</p>
+        <p className="text-text-sub">記録された活動データがありません。</p>
       )}
     </div>
   )

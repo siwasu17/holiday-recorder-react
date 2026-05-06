@@ -7,9 +7,12 @@
   --color-text-sub: #8c8b85;
   --color-border-main: #e8e6df;
   --color-accent-soft: #f0f3f5;
+  --color-chart-grid: rgba(0, 0, 0, 0.1);
   --spacing-header: 52px;
   --spacing-125: 500px;
 }
+
+@variant dark (&:where(.dark, .dark *));
 
 body {
   margin: 0;
@@ -21,4 +24,14 @@ body {
 #root {
   color: var(--color-text-main);
   background-color: var(--color-bg-main);
+}
+
+.dark {
+  --color-bg-main: #121212;
+  --color-surface: #1e1e1e;
+  --color-text-main: #e0e0e0;
+  --color-text-sub: #a0a0a0;
+  --color-border-main: #333333;
+  --color-accent-soft: #2a2a2a;
+  --color-chart-grid: rgba(255, 255, 255, 0.1);
 }

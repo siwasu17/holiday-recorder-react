@@ -62,7 +62,7 @@ export const statsService = {
     }
   },
 
-  getChartDatasets(sortedDates: Date[], dailyActivityDurations: Record<string, DailyDurations>, getDateKey: (date: Date) => string) {
+  getChartDatasets(sortedDates: Date[], dailyActivityDurations: Record<string, DailyDurations>, getDateKey: (date: Date) => string, isDark: boolean) {
     return CATEGORIES
       .filter((category) => category.key !== 'nop')
       .map((category) => {
@@ -75,7 +75,7 @@ export const statsService = {
 
         return {
           label: category.label,
-          backgroundColor: category.color,
+          backgroundColor: isDark ? category.darkColor : category.color,
           data: data,
           stack: 'activities',
         }
