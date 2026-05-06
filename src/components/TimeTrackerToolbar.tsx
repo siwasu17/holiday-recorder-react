@@ -16,9 +16,9 @@ const TimeTrackerToolbar = ({ formattedDate, isHoliday, onPreviousDay, onNextDay
         >
           &lt; Prev
         </button>
-        <div className="flex flex-col items-center text-[1.1rem] font-semibold tracking-[0.05em]">
+        <div className="text-text-main flex flex-col items-center text-[1.1rem] font-semibold tracking-[0.05em]">
           {formattedDate}
-          <label className="flex cursor-pointer items-center text-[0.75rem] font-normal select-none">
+          <label className="text-text-sub flex cursor-pointer items-center text-[0.75rem] font-normal select-none">
             <input type="checkbox" checked={isHoliday} onChange={onToggleHoliday} className="mr-1 h-3 w-3" />
             <span>休日</span>
           </label>

@@ -2,18 +2,18 @@
 import type { Category, TimeSlot } from '@/types'
 
 export const CATEGORIES: Category[] = [
-  { key: 'meal', label: '食事', color: '#FFE5D9' },
-  { key: 'rest', label: '休息', color: '#D6EFFF' },
-  { key: 'exercise', label: '運動', color: '#E2F0CB' },
-  { key: 'plan', label: '検討', color: '#E8DFF5' },
-  { key: 'dev_in', label: '開発(In)', color: '#B9F2FF' },
-  { key: 'dev_out', label: '開発(Out)', color: '#89CFF0' },
-  { key: 'culture', label: '文化', color: '#FCE1E4' },
-  { key: 'event', label: '行事', color: '#F3C4FB' },
-  { key: 'housework', label: '家事(定)', color: '#FFF9C4' },
-  { key: 'task', label: '家事(単)', color: '#FFD3D3' },
-  { key: 'etc', label: 'その他', color: '#F0F4EF' },
-  { key: 'nop', label: '余白', color: '#E0E0E0' },
+  { key: 'meal', label: '食事', color: '#FFE5D9', darkColor: '#5C3D2E' },
+  { key: 'rest', label: '休息', color: '#D6EFFF', darkColor: '#2E4C5C' },
+  { key: 'exercise', label: '運動', color: '#E2F0CB', darkColor: '#3D4D2E' },
+  { key: 'plan', label: '検討', color: '#E8DFF5', darkColor: '#443552' },
+  { key: 'dev_in', label: '開発(In)', color: '#B9F2FF', darkColor: '#2E5C66' },
+  { key: 'dev_out', label: '開発(Out)', color: '#89CFF0', darkColor: '#25465C' },
+  { key: 'culture', label: '文化', color: '#FCE1E4', darkColor: '#5C2E35' },
+  { key: 'event', label: '行事', color: '#F3C4FB', darkColor: '#5C2E5C' },
+  { key: 'housework', label: '家事(定)', color: '#FFF9C4', darkColor: '#5C5C2E' },
+  { key: 'task', label: '家事(単)', color: '#FFD3D3', darkColor: '#5C2E2E' },
+  { key: 'etc', label: 'その他', color: '#F0F4EF', darkColor: '#333D33' },
+  { key: 'nop', label: '余白', color: '#E0E0E0', darkColor: '#333333' },
 ]
 
 export const TIME_SLOTS: TimeSlot[] = [

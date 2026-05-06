@@ -7,14 +7,17 @@ import { useActivityManager } from '@/hooks/useActivityManager'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar'
 import TimeTrackerActionFooter from '@/components/TimeTrackerActionFooter'
 import ActivityEditModal from '@/components/ActivityEditModal'
+import { useThemeContext } from '@/hooks/useThemeContext'
 import type { TimeSlot, Activity } from '@/types'
 
 const getActLabel = (categoryKey: string) => {
   return CATEGORIES.find((c) => c.key === categoryKey)?.label ?? '不明'
 }
 
-const getActColor = (categoryKey: string) => {
-  return CATEGORIES.find((c) => c.key === categoryKey)?.color ?? '#000000'
+const getActColor = (categoryKey: string, isDark: boolean) => {
+  const category = CATEGORIES.find((c) => c.key === categoryKey)
+  if (!category) return '#000000'
+  return isDark ? category.darkColor : category.color
 }
 
 interface TimeSlotRowProps {
@@ -25,44 +28,56 @@ interface TimeSlotRowProps {
   onActivityClick: (slotStart: string, index: number) => void
 }
 
-const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: TimeSlotRowProps) => (
-  <div
-    onClick={onClick}
-    className={`border-border-main grid h-24 cursor-pointer grid-cols-[38px_1fr] border-b transition-colors duration-200 hover:bg-[#f9f9f9] ${isActive ? 'bg-accent-soft' : ''}`}
-    role="row"
-  >
-    <div
-      className="text-text-sub flex items-center justify-center bg-[#f1efea] p-1 text-[0.7rem] font-bold leading-tight text-center"
-      role="cell"
-    >
-      {slot.label}
-    </div>
+const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: TimeSlotRowProps) => {
+  const { theme } = useThemeContext()
+  const isDark =
+    theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
 
-    <div className="flex flex-1 flex-col gap-0.5 p-1 overflow-hidden" role="cell">
-      {activities.map((activity, index) => (
-        <div
-          key={index}
-          className="box-border grid grid-cols-[1fr_auto_1fr] h-5 w-full items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1]"
-          style={{ backgroundColor: getActColor(activity.categoryKey) }}
-          onClick={(e) => {
-            e.stopPropagation()
-            onActivityClick(slot.start, index)
-          }}
-        >
-          <div />
-          <span className="activity-label whitespace-nowrap">{getActLabel(activity.categoryKey)}</span>
-          <div className="flex justify-start pl-1 overflow-hidden">
-            {activity.memo && (
-              <div className="rounded-[3px] bg-white/60 p-[0px_4px] text-[0.85em] text-ellipsis overflow-hidden whitespace-nowrap text-[#333]">
-                {activity.memo}
-              </div>
-            )}
+  return (
+    <div
+      onClick={onClick}
+      className={`border-border-main grid h-24 cursor-pointer grid-cols-[38px_1fr] border-b transition-colors duration-200 hover:bg-accent-soft/50 ${isActive ? 'bg-accent-soft' : ''}`}
+      role="row"
+    >
+      <div
+        className="text-text-sub bg-accent-soft/30 flex items-center justify-center p-1 text-[0.7rem] font-bold leading-tight text-center"
+        role="cell"
+      >
+        {slot.label}
+      </div>
+
+      <div className="flex flex-1 flex-col gap-0.5 p-1 overflow-hidden" role="cell">
+        {activities.map((activity, index) => (
+          <div
+            key={index}
+            className={`box-border grid grid-cols-[1fr_auto_1fr] h-5 w-full items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1] transition-colors duration-200 ${
+              isDark ? 'text-[#e0e0e0]' : 'text-[#333]'
+            }`}
+            style={{ backgroundColor: getActColor(activity.categoryKey, isDark) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onActivityClick(slot.start, index)
+            }}
+          >
+            <div />
+            <span className="activity-label whitespace-nowrap">{getActLabel(activity.categoryKey)}</span>
+            <div className="flex justify-start pl-1 overflow-hidden">
+              {activity.memo && (
+                <div
+                  className={`rounded-[3px] p-[0px_4px] text-[0.85em] text-ellipsis overflow-hidden whitespace-nowrap ${
+                    isDark ? 'bg-black/40 text-[#ccc]' : 'bg-white/60 text-[#333]'
+                  }`}
+                >
+                  {activity.memo}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 interface TimeTrackerContentProps {
   dateKey: string
