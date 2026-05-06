@@ -48,9 +48,7 @@ const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: T
         {activities.map((activity, index) => (
           <div
             key={index}
-            className={`box-border grid grid-cols-[1fr_auto_1fr] h-5 w-full items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1] transition-colors duration-200 ${
-              isDark ? 'text-[#e0e0e0]' : 'text-[#333]'
-            }`}
+            className="box-border grid grid-cols-[1fr_auto_1fr] h-5 w-full items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1] transition-colors duration-200 text-text-main"
             style={{ backgroundColor: getActColor(activity.categoryKey, isDark) }}
             onClick={(e) => {
               e.stopPropagation()
@@ -61,11 +59,7 @@ const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: T
             <span className="activity-label whitespace-nowrap">{getActLabel(activity.categoryKey)}</span>
             <div className="flex justify-start pl-1 overflow-hidden">
               {activity.memo && (
-                <div
-                  className={`rounded-[3px] p-[0px_4px] text-[0.85em] text-ellipsis overflow-hidden whitespace-nowrap ${
-                    isDark ? 'bg-black/40 text-[#ccc]' : 'bg-white/60 text-[#333]'
-                  }`}
-                >
+                <div className="rounded-[3px] bg-surface/40 p-[0px_4px] text-[0.85em] text-ellipsis overflow-hidden whitespace-nowrap text-text-main">
                   {activity.memo}
                 </div>
               )}

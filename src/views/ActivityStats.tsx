@@ -13,7 +13,7 @@ import {
 import { Bar } from 'react-chartjs-2'
 import { activityService } from '@/services/activityService'
 import { statsService, DailyDurations, StatsResult } from '@/services/statsService'
-import { A_DAY_IN_MILLISECONDS } from '@/constants'
+import { A_DAY_IN_MILLISECONDS, THEME_COLORS } from '@/constants'
 import { getDateKey } from '@/utils/date'
 import { useThemeContext } from '@/hooks/useThemeContext'
 
@@ -25,8 +25,9 @@ const ActivityStats = () => {
   const [stats, setStats] = useState<StatsResult | null>(null)
 
   const chartOptions = useMemo<ChartOptions<'bar'>>(() => {
-    const textColor = isDark ? '#e0e0e0' : '#4a4945'
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+    const colors = isDark ? THEME_COLORS.dark : THEME_COLORS.light
+    const textColor = colors.textMain
+    const gridColor = colors.grid
 
     return {
       responsive: true,

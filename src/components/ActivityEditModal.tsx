@@ -53,9 +53,7 @@ const ActivityEditModal = ({
             {slotLabel} #{slotIndex + 1}
           </span>
           <div
-            className={`rounded-md p-[4px_12px] text-[1.2rem] font-bold transition-colors duration-200 ${
-              isDark ? 'text-[#e0e0e0]' : 'text-[#333]'
-            }`}
+            className="rounded-md p-[4px_12px] text-[1.2rem] font-bold transition-colors duration-200 text-text-main"
             style={{ backgroundColor: categoryColor }}
           >
             {category?.label ?? '不明'}

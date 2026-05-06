@@ -32,9 +32,7 @@ const App = () => {
   }
 
   const toggleTheme = () => {
-    const themes: ('light' | 'dark' | 'system')[] = ['light', 'dark', 'system']
-    const nextIndex = (themes.indexOf(theme) + 1) % themes.length
-    setTheme(themes[nextIndex])
+    setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light')
   }
 
   const getThemeIcon = () => {
