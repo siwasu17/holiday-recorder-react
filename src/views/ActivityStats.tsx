@@ -64,7 +64,6 @@ const ActivityStats = () => {
       },
     }
     // theme 変更時に CSS 変数を再取得させるため、isDark をトリガーとして依存配列に含める
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDark])
 
   const createChartData = useCallback(
