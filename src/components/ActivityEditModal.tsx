@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import type { Activity } from '@/types'
 import { CATEGORIES } from '@/constants'
 import CategoryGrid from './CategoryGrid'
@@ -34,9 +34,7 @@ const ActivityEditModal = ({
     setMemo(activity?.memo || '')
   }
 
-  const category = useMemo(() => {
-    return CATEGORIES.find((c) => c.key === activity?.categoryKey)
-  }, [activity])
+  const category = CATEGORIES.find((c) => c.key === activity?.categoryKey)
 
   if (!show) return null
 

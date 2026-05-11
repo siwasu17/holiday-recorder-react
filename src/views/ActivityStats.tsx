@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Chart as ChartJS,
   Title,
@@ -25,77 +25,69 @@ const ActivityStats = () => {
   const { isDark } = useThemeContext()
   const [stats, setStats] = useState<StatsResult | null>(null)
 
-  const chartOptions = useMemo<ChartOptions<'bar'>>(() => {
-    // CSS変数から直接値を取得（isDark を依存配列に入れることでテーマ変更時に再取得される）
-    const textColor = getCssVariableValue('--color-text-main')
-    const gridColor = getCssVariableValue('--color-chart-grid')
+  const textColor = getCssVariableValue('--color-text-main')
+  const gridColor = getCssVariableValue('--color-chart-grid')
 
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 1000, easing: 'easeOutQuart' as const },
-      interaction: { mode: 'nearest' as const, intersect: true },
-      plugins: {
-        title: { display: true, text: '日別 活動時間', color: textColor },
-        legend: { labels: { color: textColor } },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              let label = context.dataset.label || ''
-              if (label) label += ': '
-              if (context.parsed.y !== null) label += `${context.parsed.y.toFixed(1)} 時間`
-              return label
-            },
+  const chartOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 1000, easing: 'easeOutQuart' as const },
+    interaction: { mode: 'nearest' as const, intersect: true },
+    plugins: {
+      title: { display: true, text: '日別 活動時間', color: textColor },
+      legend: { labels: { color: textColor } },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            let label = context.dataset.label || ''
+            if (label) label += ': '
+            if (context.parsed.y !== null) label += `${context.parsed.y.toFixed(1)} 時間`
+            return label
           },
         },
       },
-      scales: {
-        x: {
-          stacked: true,
-          ticks: { color: textColor },
-          grid: { color: gridColor },
-        },
-        y: {
-          stacked: true,
-          title: { display: true, text: '合計時間', color: textColor },
-          ticks: { color: textColor },
-          grid: { color: gridColor },
-        },
-      },
-    }
-    // theme 変更時に CSS 変数を再取得させるため、isDark をトリガーとして依存配列に含める
-  }, [isDark])
-
-  const createChartData = useCallback(
-    (dates: Date[], durations: Record<string, DailyDurations>) => {
-      const sortedDates = [...dates].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
-      const labels = [...sortedDates].reverse().map((date) => {
-        const dayOfWeek = date.toLocaleDateString('ja-JP', { weekday: 'short' }).slice(0, 1)
-        const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
-        return `${label}(${dayOfWeek})`
-      })
-      const datasets = statsService.getChartDatasets(sortedDates, durations, getDateKey, isDark)
-      return { labels, datasets }
     },
-    [isDark],
-  )
+    scales: {
+      x: {
+        stacked: true,
+        ticks: { color: textColor },
+        grid: { color: gridColor },
+      },
+      y: {
+        stacked: true,
+        title: { display: true, text: '合計時間', color: textColor },
+        ticks: { color: textColor },
+        grid: { color: gridColor },
+      },
+    },
+  }
 
-  const holidayChartData = useMemo<ChartData<'bar'>>(() => {
-    if (!stats) return { labels: [], datasets: [] }
-    return createChartData(stats.holidayDatesWithData, stats.holidayDailyActivityDurations)
-  }, [stats, createChartData])
+  const createChartData = (dates: Date[], durations: Record<string, DailyDurations>) => {
+    const sortedDates = [...dates].sort((a, b) => b.getTime() - a.getTime()).slice(0, 8)
+    const labels = [...sortedDates].reverse().map((date) => {
+      const dayOfWeek = date.toLocaleDateString('ja-JP', { weekday: 'short' }).slice(0, 1)
+      const label = date.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })
+      return `${label}(${dayOfWeek})`
+    })
+    const datasets = statsService.getChartDatasets(sortedDates, durations, getDateKey, isDark)
+    return { labels, datasets }
+  }
 
-  const weekdayChartData = useMemo<ChartData<'bar'>>(() => {
-    if (!stats) return { labels: [], datasets: [] }
-    return createChartData(stats.weekdayDatesWithData, stats.weekdayDailyActivityDurations)
-  }, [stats, createChartData])
+  const holidayChartData: ChartData<'bar'> =
+    stats && createChartData(stats.holidayDatesWithData, stats.holidayDailyActivityDurations) || {
+      labels: [],
+      datasets: [],
+    }
 
-  const hasData = useMemo(
-    () =>
-      (holidayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false) ||
-      (weekdayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false),
-    [holidayChartData, weekdayChartData],
-  )
+  const weekdayChartData: ChartData<'bar'> =
+    stats && createChartData(stats.weekdayDatesWithData, stats.weekdayDailyActivityDurations) || {
+      labels: [],
+      datasets: [],
+    }
+
+  const hasData =
+    (holidayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false) ||
+    (weekdayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false)
 
   useEffect(() => {
     const initialize = async () => {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
 import { CATEGORIES, TIME_SLOTS } from '@/constants'
@@ -110,14 +110,12 @@ const TimeTrackerContent = ({
     deleteActivity,
   } = useActivityManager(dateKey, initialActivities)
 
-  const formattedDate = useMemo(() => {
-    return currentDate.toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      weekday: 'short',
-    })
-  }, [currentDate])
+  const formattedDate = currentDate.toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+  })
 
   return (
     <div className="flex h-[calc(100dvh-(var(--spacing-header)))] flex-col">
@@ -184,18 +182,18 @@ const TimeTrackerContent = ({
 
 const TimeTracker = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const dateKey = useMemo(() => getDateKey(currentDate), [currentDate])
+  const dateKey = getDateKey(currentDate)
 
   const dbActivityEntry = useLiveQuery(() => activityService.getActivities(dateKey), [dateKey])
   const dbHolidayEntry = useLiveQuery(() => activityService.getHoliday(dateKey), [dateKey])
 
-  const isHoliday = useMemo(() => {
+  const isHoliday = (() => {
     const userDefinedHolidays: Record<string, boolean> = {}
     if (dbHolidayEntry !== null && dbHolidayEntry !== undefined) {
       userDefinedHolidays[dateKey] = dbHolidayEntry
     }
     return isHolidayUtil(currentDate, userDefinedHolidays)
-  }, [currentDate, dateKey, dbHolidayEntry])
+  })()
 
   const changeDay = (days: number) => {
     const newDate = new Date(currentDate)
