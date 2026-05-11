@@ -73,11 +73,12 @@ const ActivityStats = () => {
     return { labels, datasets }
   }
 
-  const holidayChartData: ChartData<'bar'> =
-    stats && createChartData(stats.holidayDatesWithData, stats.holidayDailyActivityDurations) || {
-      labels: [],
-      datasets: [],
-    }
+  const holidayChartData: ChartData<'bar'> = stats
+    ? createChartData(stats.holidayDatesWithData, stats.holidayDailyActivityDurations)
+    : {
+        labels: [],
+        datasets: [],
+      }
 
   const weekdayChartData: ChartData<'bar'> =
     stats && createChartData(stats.weekdayDatesWithData, stats.weekdayDailyActivityDurations) || {
