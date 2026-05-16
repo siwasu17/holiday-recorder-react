@@ -34,21 +34,21 @@ const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: T
   return (
     <div
       onClick={onClick}
-      className={`border-border-main grid h-24 cursor-pointer grid-cols-[38px_1fr] border-b transition-colors duration-200 hover:bg-accent-soft/50 ${isActive ? 'bg-accent-soft' : ''}`}
+      className={`border-border-main hover:bg-accent-soft/50 grid h-24 cursor-pointer grid-cols-[38px_1fr] border-b transition-colors duration-200 ${isActive ? 'bg-accent-soft' : ''}`}
       role="row"
     >
       <div
-        className="text-text-sub bg-accent-soft/30 flex items-center justify-center p-1 text-[0.7rem] font-bold leading-tight text-center"
+        className="text-text-sub bg-accent-soft/30 flex items-center justify-center p-1 text-center text-[0.7rem] leading-tight font-bold"
         role="cell"
       >
         {slot.label}
       </div>
 
-      <div className="flex flex-1 flex-col gap-0.5 p-1 overflow-hidden" role="cell">
+      <div className="flex flex-1 flex-col gap-0.5 overflow-hidden p-1" role="cell">
         {activities.map((activity, index) => (
           <div
             key={index}
-            className="box-border grid grid-cols-[1fr_auto_1fr] h-5 w-full items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1] transition-colors duration-200 text-text-main"
+            className="text-text-main box-border grid h-5 w-full grid-cols-[1fr_auto_1fr] items-center overflow-hidden rounded-[3px] p-[2px_4px] text-[clamp(0.6rem,1.5vh,0.75rem)] leading-[1.1] transition-colors duration-200"
             style={{ backgroundColor: getActColor(activity.categoryKey, isDark) }}
             onClick={(e) => {
               e.stopPropagation()
@@ -57,9 +57,9 @@ const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: T
           >
             <div />
             <span className="activity-label whitespace-nowrap">{getActLabel(activity.categoryKey)}</span>
-            <div className="flex justify-start pl-1 overflow-hidden">
+            <div className="flex justify-start overflow-hidden pl-1">
               {activity.memo && (
-                <div className="rounded-[3px] bg-surface/40 p-[0px_4px] text-[0.85em] text-ellipsis overflow-hidden whitespace-nowrap text-text-main">
+                <div className="bg-surface/40 text-text-main overflow-hidden rounded-[3px] p-[0px_4px] text-[0.85em] text-ellipsis whitespace-nowrap">
                   {activity.memo}
                 </div>
               )}
@@ -130,7 +130,7 @@ const TimeTrackerContent = ({
       <main className="flex-1 overflow-y-auto pb-57.5">
         <div className="border-border-main grid w-full grid-cols-2 border-t" role="table">
           {/* 左列（前半のスロット） */}
-          <div className="flex flex-col border-r border-border-main">
+          <div className="border-border-main flex flex-col border-r">
             {TIME_SLOTS.slice(0, Math.ceil(TIME_SLOTS.length / 2)).map((slot) => (
               <TimeSlotRow
                 key={slot.start}
@@ -208,7 +208,7 @@ const TimeTracker = () => {
   if (dbActivityEntry === undefined) {
     return (
       <div className="flex h-full items-center justify-center p-5">
-        <div className="text-gray-500 text-sm">読み込み中...</div>
+        <div className="text-sm text-gray-500">読み込み中...</div>
       </div>
     )
   }

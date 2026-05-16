@@ -51,7 +51,7 @@ const ActivityEditModal = ({
             {slotLabel} #{slotIndex + 1}
           </span>
           <div
-            className="rounded-md p-[4px_12px] text-[1.2rem] font-bold transition-colors duration-200 text-text-main"
+            className="text-text-main rounded-md p-[4px_12px] text-[1.2rem] font-bold transition-colors duration-200"
             style={{ backgroundColor: categoryColor }}
           >
             {category?.label ?? '不明'}
@@ -87,7 +87,10 @@ const ActivityEditModal = ({
           >
             保存
           </button>
-          <button onClick={onClose} className="bg-accent-soft text-text-main cursor-pointer rounded-md border-none p-2.5">
+          <button
+            onClick={onClose}
+            className="bg-accent-soft text-text-main cursor-pointer rounded-md border-none p-2.5"
+          >
             キャンセル
           </button>
         </div>

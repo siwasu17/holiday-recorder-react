@@ -35,4 +35,3 @@ export const LOCAL_STORAGE_ACTIVITY_PREFIX = 'activities-'
 export const LOCAL_STORAGE_HOLIDAY_MAP_KEY = 'userDefinedHolidayMap'
 
 export const A_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
-

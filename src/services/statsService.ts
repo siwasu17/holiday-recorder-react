@@ -14,7 +14,10 @@ export interface StatsResult {
 }
 
 export const statsService = {
-  calculateDailyDurations(activitiesEntries: { date: string; slots: Record<string, Activity[]> }[], holidayMap: Record<string, boolean>): StatsResult {
+  calculateDailyDurations(
+    activitiesEntries: { date: string; slots: Record<string, Activity[]> }[],
+    holidayMap: Record<string, boolean>,
+  ): StatsResult {
     const holidayDailyActivityDurations: Record<string, DailyDurations> = {}
     const weekdayDailyActivityDurations: Record<string, DailyDurations> = {}
     const holidayDatesWithData: Date[] = []
@@ -62,9 +65,13 @@ export const statsService = {
     }
   },
 
-  getChartDatasets(sortedDates: Date[], dailyActivityDurations: Record<string, DailyDurations>, getDateKey: (date: Date) => string, isDark: boolean) {
-    return CATEGORIES
-      .filter((category) => category.key !== 'nop')
+  getChartDatasets(
+    sortedDates: Date[],
+    dailyActivityDurations: Record<string, DailyDurations>,
+    getDateKey: (date: Date) => string,
+    isDark: boolean,
+  ) {
+    return CATEGORIES.filter((category) => category.key !== 'nop')
       .map((category) => {
         const data = sortedDates
           .map((date) => {
@@ -81,5 +88,5 @@ export const statsService = {
         }
       })
       .filter((dataset) => dataset.data.some((d) => d > 0))
-  }
+  },
 }

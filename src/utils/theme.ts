@@ -4,6 +4,6 @@
  * @returns 変数の値
  */
 export const getCssVariableValue = (variableName: string): string => {
-  if (typeof window === 'undefined') return '';
-  return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
-};
+  if (typeof window === 'undefined') return ''
+  return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim()
+}
