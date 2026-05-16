@@ -24,9 +24,26 @@ const ActivityStats = () => {
   const [isLoading, setIsLoading] = useState(true)
   const { isDark } = useThemeContext()
   const [stats, setStats] = useState<StatsResult | null>(null)
+  const [chartColors, setChartColors] = useState({
+    text: getCssVariableValue('--color-text-main'),
+    grid: getCssVariableValue('--color-chart-grid'),
+  })
 
-  const textColor = getCssVariableValue('--color-text-main')
-  const gridColor = getCssVariableValue('--color-chart-grid')
+  const textColor = chartColors.text
+  const gridColor = chartColors.grid
+
+  useEffect(() => {
+    // テーマ切り替え（DOMへのクラス付与）が完了した後にCSS変数を取得する
+    const updateColors = () => {
+      requestAnimationFrame(() => {
+        setChartColors({
+          text: getCssVariableValue('--color-text-main'),
+          grid: getCssVariableValue('--color-chart-grid'),
+        })
+      })
+    }
+    updateColors()
+  }, [isDark])
 
   const chartOptions: ChartOptions<'bar'> = {
     responsive: true,
@@ -80,11 +97,11 @@ const ActivityStats = () => {
         datasets: [],
       }
 
-  const weekdayChartData: ChartData<'bar'> =
-    stats && createChartData(stats.weekdayDatesWithData, stats.weekdayDailyActivityDurations) || {
-      labels: [],
-      datasets: [],
-    }
+  const weekdayChartData: ChartData<'bar'> = (stats &&
+    createChartData(stats.weekdayDatesWithData, stats.weekdayDailyActivityDurations)) || {
+    labels: [],
+    datasets: [],
+  }
 
   const hasData =
     (holidayChartData.datasets?.some((d) => d.data.some((v) => (v as number) > 0)) ?? false) ||
