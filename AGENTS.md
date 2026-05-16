@@ -17,7 +17,7 @@
 
 # Code Style
 
-- **ファイル命名**: コンポーネントは PascalCase (`ActivityEditModal.tsx`)、ユーティリティなどは kebab-case。
+- **ファイル命名**: コンポーネントは PascalCase (`ActivityEditModal.tsx`)、ユーティリティなどは kebab-case (`my-util.ts`)。ただし、React のフックは `useMyHook.ts` のように camelCase とします。
 - **コンポーネント**: フックを使用した関数コンポーネント。
 - **最適化**: React Compiler により自動最適化されるため、パフォーマンス最適化のための依存関係配列の管理や手動メモ化は最小限にする。
 - **状態管理**: React Context API とフック（例: `useActivityManager`）を優先。
