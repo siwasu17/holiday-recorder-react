@@ -34,15 +34,14 @@ const ActivityStats = () => {
 
   useEffect(() => {
     // テーマ切り替え（DOMへのクラス付与）が完了した後にCSS変数を取得する
-    const updateColors = () => {
-      requestAnimationFrame(() => {
-        setChartColors({
-          text: getCssVariableValue('--color-text-main'),
-          grid: getCssVariableValue('--color-chart-grid'),
-        })
+    const rafId = requestAnimationFrame(() => {
+      setChartColors({
+        text: getCssVariableValue('--color-text-main'),
+        grid: getCssVariableValue('--color-chart-grid'),
       })
-    }
-    updateColors()
+    })
+
+    return () => cancelAnimationFrame(rafId)
   }, [isDark])
 
   const chartOptions: ChartOptions<'bar'> = {
