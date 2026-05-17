@@ -37,9 +37,9 @@ body {
   --color-text-sub: #a0a0a0;
   --color-border-main: #333333;
   --color-accent-soft: #2a2a2a;
-  --color-primary: #3791ff;
-  --color-primary-hover: #5da5ff;
-  --color-error: #ff6b6b;
-  --color-error-hover: #ff8585;
+  --color-primary: #2563eb;
+  --color-primary-hover: #3b82f6;
+  --color-error: #dc2626;
+  --color-error-hover: #ef4444;
   --color-chart-grid: rgba(255, 255, 255, 0.1);
 }

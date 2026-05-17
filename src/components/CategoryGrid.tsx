@@ -14,6 +14,7 @@ const CategoryGrid = ({ onSelectCategory, buttonClassName }: Props) => {
       {CATEGORIES.map((category) => (
         <button
           key={category.key}
+          type="button"
           className={`text-text-main cursor-pointer rounded-sm border-none text-[0.8rem] transition-colors duration-200 ${
             buttonClassName || 'p-2'
           }`}

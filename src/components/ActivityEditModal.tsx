@@ -57,6 +57,7 @@ const ActivityEditModal = ({
             {category?.label ?? '不明'}
           </div>
           <button
+            type="button"
             onClick={onDeleteActivity}
             className="hover:bg-error-hover cursor-pointer rounded-md border-none bg-error p-2.5 text-white transition-colors duration-200"
           >
@@ -82,12 +83,14 @@ const ActivityEditModal = ({
 
         <div className="mt-5 flex flex-col gap-2.5">
           <button
+            type="button"
             onClick={() => onUpdateActivityMemo(memo)}
             className="bg-primary hover:bg-primary-hover cursor-pointer rounded-md border-none p-[8px_15px] whitespace-nowrap text-white transition-colors duration-200"
           >
             保存
           </button>
           <button
+            type="button"
             onClick={onClose}
             className="bg-accent-soft text-text-main cursor-pointer rounded-md border-none p-2.5"
           >
