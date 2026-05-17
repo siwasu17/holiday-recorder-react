@@ -35,3 +35,7 @@ export const LOCAL_STORAGE_ACTIVITY_PREFIX = 'activities-'
 export const LOCAL_STORAGE_HOLIDAY_MAP_KEY = 'userDefinedHolidayMap'
 
 export const A_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
+
+export const SLOT_DURATION_MINUTES = 120
+export const LATE_NIGHT_THRESHOLD_HOUR = 4
+export const TIME_LABEL_COLUMN_WIDTH = 38
