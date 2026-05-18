@@ -11,6 +11,7 @@ const TimeTrackerToolbar = ({ formattedDate, isHoliday, onPreviousDay, onNextDay
     <div className="bg-surface top-header sticky z-10 w-full p-0 shadow-[0_2px_4px_rgba(0,0,0,0.05)]">
       <div className="box-border flex h-12.5 items-center justify-between p-2.5">
         <button
+          type="button"
           onClick={onPreviousDay}
           className="border-border-main text-text-main hover:bg-accent-soft flex min-w-10 cursor-pointer items-center justify-center rounded-[20px] border bg-transparent px-4 py-1.5 text-[0.9rem] font-medium transition-all duration-200 outline-none"
         >
@@ -24,6 +25,7 @@ const TimeTrackerToolbar = ({ formattedDate, isHoliday, onPreviousDay, onNextDay
           </label>
         </div>
         <button
+          type="button"
           onClick={onNextDay}
           className="border-border-main text-text-main hover:bg-accent-soft flex min-w-10 cursor-pointer items-center justify-center rounded-[20px] border bg-transparent px-4 py-1.5 text-[0.9rem] font-medium transition-all duration-200 outline-none"
         >

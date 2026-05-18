@@ -7,6 +7,10 @@
   --color-text-sub: #8c8b85;
   --color-border-main: #e8e6df;
   --color-accent-soft: #f0f3f5;
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-error: #ff4d4f;
+  --color-error-hover: #d9363e;
   --color-chart-grid: rgba(0, 0, 0, 0.1);
   --spacing-header: 52px;
   --spacing-125: 500px;
@@ -33,5 +37,9 @@ body {
   --color-text-sub: #a0a0a0;
   --color-border-main: #333333;
   --color-accent-soft: #2a2a2a;
+  --color-primary: #2563eb;
+  --color-primary-hover: #3b82f6;
+  --color-error: #dc2626;
+  --color-error-hover: #ef4444;
   --color-chart-grid: rgba(255, 255, 255, 0.1);
 }
