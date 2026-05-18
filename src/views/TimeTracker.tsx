@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { getDateKey, isHoliday as isHolidayUtil } from '@/utils/date'
-import { CATEGORIES, TIME_SLOTS } from '@/constants'
+import { useCurrentTime } from '@/hooks/useCurrentTime'
+import { getDateKey, isHoliday as isHolidayUtil, isSameDay, getEffectiveToday, parseSlotTime, getMinutesInDay } from '@/utils/date'
+import { CATEGORIES, TIME_SLOTS, SLOT_DURATION_MINUTES, TIME_LABEL_COLUMN_WIDTH } from '@/constants'
 import { activityService, type ActivityMap } from '@/services/activityService'
 import { useActivityManager } from '@/hooks/useActivityManager'
 import TimeTrackerToolbar from '@/components/TimeTrackerToolbar'
@@ -24,17 +25,32 @@ interface TimeSlotRowProps {
   slot: TimeSlot
   activities: Activity[]
   isActive: boolean
+  now: Date | null
   onClick: () => void
   onActivityClick: (slotStart: string, index: number) => void
 }
 
-const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: TimeSlotRowProps) => {
+const TimeSlotRow = ({ slot, activities, isActive, now, onClick, onActivityClick }: TimeSlotRowProps) => {
   const { isDark } = useThemeContext()
+
+  const getIndicatorTop = () => {
+    if (!now) return null
+    const slotStartMin = parseSlotTime(slot.start)
+    const nowMin = getMinutesInDay(now)
+    const diff = nowMin - slotStartMin
+    if (diff >= 0 && diff < SLOT_DURATION_MINUTES) {
+      return (diff / SLOT_DURATION_MINUTES) * 100
+    }
+    return null
+  }
+
+  const indicatorTop = getIndicatorTop()
 
   return (
     <div
       onClick={onClick}
-      className={`border-border-main hover:bg-accent-soft/50 grid h-24 cursor-pointer grid-cols-[38px_1fr] border-b transition-colors duration-200 ${isActive ? 'bg-accent-soft' : ''}`}
+      className={`border-border-main hover:bg-accent-soft/50 grid h-24 cursor-pointer border-b transition-colors duration-200 ${isActive ? 'bg-accent-soft' : ''} relative`}
+      style={{ gridTemplateColumns: `${TIME_LABEL_COLUMN_WIDTH}px 1fr` }}
       role="row"
     >
       <div
@@ -67,6 +83,17 @@ const TimeSlotRow = ({ slot, activities, isActive, onClick, onActivityClick }: T
           </div>
         ))}
       </div>
+
+      {indicatorTop !== null && (
+        <div
+          className="pointer-events-none absolute z-10 border-t border-blue-400/60"
+          style={{
+            top: `${indicatorTop}%`,
+            left: `${TIME_LABEL_COLUMN_WIDTH}px`,
+            width: `calc(100% - ${TIME_LABEL_COLUMN_WIDTH}px)`,
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -76,6 +103,8 @@ interface TimeTrackerContentProps {
   currentDate: Date
   initialActivities: ActivityMap
   isHoliday: boolean
+  now: Date
+  isShowingToday: boolean
   onPreviousDay: () => void
   onNextDay: () => void
   onToggleHoliday: () => void
@@ -86,6 +115,8 @@ const TimeTrackerContent = ({
   currentDate,
   initialActivities,
   isHoliday,
+  now,
+  isShowingToday,
   onPreviousDay,
   onNextDay,
   onToggleHoliday,
@@ -137,6 +168,7 @@ const TimeTrackerContent = ({
                 slot={slot}
                 activities={activities[slot.start] ?? []}
                 isActive={currentTimeSlot === slot.start}
+                now={isShowingToday ? now : null}
                 onClick={() => setCurrentTimeSlot(slot.start)}
                 onActivityClick={openEditModal}
               />
@@ -150,6 +182,7 @@ const TimeTrackerContent = ({
                 slot={slot}
                 activities={activities[slot.start] ?? []}
                 isActive={currentTimeSlot === slot.start}
+                now={isShowingToday ? now : null}
                 onClick={() => setCurrentTimeSlot(slot.start)}
                 onActivityClick={openEditModal}
               />
@@ -182,6 +215,7 @@ const TimeTrackerContent = ({
 
 const TimeTracker = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const now = useCurrentTime()
   const dateKey = getDateKey(currentDate)
 
   const dbActivityEntry = useLiveQuery(() => activityService.getActivities(dateKey), [dateKey])
@@ -220,6 +254,8 @@ const TimeTracker = () => {
       currentDate={currentDate}
       initialActivities={dbActivityEntry ?? {}}
       isHoliday={isHoliday}
+      now={now}
+      isShowingToday={isSameDay(currentDate, getEffectiveToday())}
       onPreviousDay={() => changeDay(-1)}
       onNextDay={() => changeDay(1)}
       onToggleHoliday={toggleHoliday}
