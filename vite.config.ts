@@ -25,6 +25,7 @@ export default defineConfig({
         description: 'A simple time tracking application',
         display: 'standalone',
         theme_color: '#fcfaf2',
+        background_color: '#fcfaf2',
         icons: [
           {
             src: 'pwa-64x64.png',
